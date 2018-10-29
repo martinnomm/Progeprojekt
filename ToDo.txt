@@ -1,0 +1,13 @@
+
+(((ALPHA)))
+Done:
+	-Temporary fighting system as a base to build upon
+	
+To do:
+	-Random monsters
+		-Define monsters by type
+		-Create individual monsters for each instance
+	-Player attacks and interactions
+		-Different attacks, items etc (somewhat)
+		-Ability to flee a fight
+		
