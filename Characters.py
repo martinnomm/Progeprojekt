@@ -17,20 +17,22 @@ class Player(Character):
     defense = 12
     strength = D8()
     def attack(self, target, hit_chance):
-        print("To attack press ENTER, type to not attack")
-        answer = input("")
-        if answer == "":
-            if hit_chance >= target.defense:
-                print("You swing at the {0.name}".format(target))
-                print("Hit chance is {}.".format(hit_chance))
-                sleep(0.1)
-                print("Your attack hits the {0.name}".format(target))
-                target.health -= self.strength
-            else:
-                print("You miss your attack")
+        #print("To attack press ENTER, type to not attack")
+        #answer = input("")
+        #if answer == "":
+        if hit_chance >= target.defense:
+            print("You swing at the {0.name}".format(target))
+            print("Hit chance is {}.".format(hit_chance))
+            sleep(0.1)
+            print("Your attack hits the {0.name}".format(target))
+            target.health -= D8()
         else:
-            print("You don't do a thing")
-        sleep(0.1)
+            print("You miss your attack")
+
+        #else:
+        #    print("You don't do a thing")
+        #sleep(0.1)
+
     
     
     
@@ -45,7 +47,12 @@ class Enemy(Character):
     def attack(self,target):
         target.health -= self.strength
         
+class Goblin(Enemy):
+    def __init__(self, name = "goblin", strength = D6(), defense = 8, health = 11):
+        super().__init__(name,strength,defense,health)
 
+    def attack(self,target):
+        target.health -= D6()
 
 
 def battle(player,enemy):
@@ -53,7 +60,20 @@ def battle(player,enemy):
     #Combat loop
     while player.health > 0 and enemy.health > 0:
         player_hit_chance = D20()
-        player.attack(enemy, player_hit_chance)
+        action = input("Do you want to attack, flee or do nothing? (attack,flee,ENTER)")
+        if action.lower() == "attack":
+            player.attack(enemy,player_hit_chance)
+        elif action.lower() == "flee":
+            if D20() > 10:
+                print("You flee the fight")
+                break
+            else:
+                print("Failed to flee")
+        elif action == "":
+            print("You do nothing")
+        else:
+            print("Not understood, doing nothing")
+
         print("The health of the {0.name} is now {0.health}.".format(enemy))
         if enemy.health <= 0:
             break
@@ -70,7 +90,8 @@ def battle(player,enemy):
         sleep(0.1)
 
     #Display outcome
-    if player.health > 0:
+    if enemy.health <= 0:
         print("You killed the {0.name}.".format(enemy))
-    elif enemy.health > 0:
+    elif player.health <= 0:
         print("The {0.name} killed you.".format(enemy))
+
