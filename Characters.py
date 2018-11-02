@@ -1,4 +1,3 @@
-from random import *
 from time import *
 from Dices import *
 

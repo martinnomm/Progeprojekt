@@ -1,17 +1,17 @@
-import Dices
-import Characters
-import random
+from Dices import *
+from Characters import *
+from random import randint
 import time
 
-playerlist = [Characters.Player()]
+playerlist = [Player()]
 player = playerlist[0]
 
 def fight():
-    Characters.battle(player, Characters.Goblin())
+    battle(player, Goblin())
 
 
 
-#enemies = [Characters.Enemy("Goblin", Dices.D4(), 8, 11)]
+#enemies = [Enemy("Goblin", D4(), 8, 11)]
 
 while True:
     print("Choose a direction(left or right) or fight")
@@ -19,7 +19,7 @@ while True:
     if vastus.lower() in ("left","right"):
         print("You decide to move {}.".format(vastus))
         time.sleep(1)
-        if Dices.D20() > 4:
+        if D20() > 4:
             print("You reach your destination safely")
         else:
             fight()

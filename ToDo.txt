@@ -11,3 +11,17 @@ To do:
 		-Different attacks, items etc (somewhat)
 		-Ability to flee a fight
 		
+
+
+
+
+
+
+"The (enemy) attempts to flee" random chance on low hp
+Different start choice of weapon/race, high dam but low hit chance, med dam med hit chance
+*Critical strike* "You deal a devastating attack"
+"You deal moderate damage to your enemy" translate
+"You deal low damage to your enemy" translate
+
+
+Area = 
