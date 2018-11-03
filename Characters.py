@@ -32,6 +32,25 @@ class Player(Character):
         #    print("You don't do a thing")
         #sleep(0.1)
 
+#
+#
+#Template weapons as a test
+class Weapon:
+    def __init__(self, damage_roll, attributes):
+        self.damage_roll = damage_roll
+        self.attributes = attributes
+
+class Stiletto(Weapon):
+    def __init__(self, damage_roll=D6(),attributes=["bleed"]):
+        super().__init__(damage_roll,attributes)
+
+class Mace(Weapon):
+    def __init__(self,damage_roll=D8(),attributes=["bash"]:
+        super().__init__(damage_roll,attributes)
+
+class Scythe(Weapon):
+    def __init__(self,damage_roll=D8(),attributes=["poison"]):
+        super().__init__(damage_roll,attributes)
     
     
     
@@ -94,3 +113,31 @@ def battle(player,enemy):
     elif player.health <= 0:
         print("The {0.name} killed you.".format(enemy))
 
+def new_battle(player,enemy):
+    print("An enemy {0.name} appears".format(enemy))
+    while player.health and enemy.health > 0:
+        player_hit_chance = D20()
+        print("attack or flee or defend")
+        action = input()
+        if action == "attack":
+            sleep(1)
+            player_defense = 0
+            player.attack(enemy, player_hit_chance)
+        elif action == "flee":
+            player_defense = 0
+            sleep(1)
+            if D20() > 10:
+                print("You flee the fight")
+                break
+            else:
+                print("Failed to flee")
+        elif action == "defend":
+            player_defense = D4()
+        else:
+            print("Not understood, doing nothing")
+
+        if enemy.health <= 0:
+            break
+        enemy_hit_chance = D20()
+        if enemy_hit_chance >= player.defense:
+            print("The {0.name} attacks you".format(enemy))

@@ -24,4 +24,10 @@ Different start choice of weapon/race, high dam but low hit chance, med dam med 
 "You deal low damage to your enemy" translate
 
 
-Area = 
+Area as class ( name, connections)
+Weapon statuses ( bleed, bash, poison)
+1 Dungeon that is made up of areas. Each has neighbouring areas in class
+Current area
+2 Lists of visited and not visited areas. 
+Encouter defined. if battle/../../ etc.
+Enemy attributes/statuses. Poison, mini-stun, bleed etc
