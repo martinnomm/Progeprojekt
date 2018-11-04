@@ -11,20 +11,27 @@ class Character:
 class Player(Character):
 
     def __init__(self,health=12):
+        self.chosen_weapon = None
         super().__init__(health)
-
-    defense = 12
+    evasion = 12
     strength = D8()
     def attack(self, target, hit_chance):
         #print("To attack press ENTER, type to not attack")
         #answer = input("")
         #if answer == "":
-        if hit_chance >= target.defense:
+        if hit_chance >= target.evasion:
             print("You swing at the {0.name}".format(target))
             print("Hit chance is {}.".format(hit_chance))
             sleep(0.1)
             print("Your attack hits the {0.name}".format(target))
-            target.health -= D8()
+            target.health -= randint(self.chosen_weapon.damage_roll[0],self.chosen_weapon.damage_roll[1])
+            if "bleed" in self.chosen_weapon.attributes:
+                target.status_effects.append("bleeding")
+            if "stun" in self.chosen_weapon.attributes:
+                target.status_effects.append("stunned")
+            if "poison" in self.chosen_weapon.attributes:
+                target.status_effects.append("poisoned")
+
         else:
             print("You miss your attack")
 
@@ -36,45 +43,57 @@ class Player(Character):
 #
 #Template weapons as a test
 class Weapon:
-    def __init__(self, damage_roll, attributes):
+    def __init__(self,damage_roll,attributes):
         self.damage_roll = damage_roll
         self.attributes = attributes
 
 class Stiletto(Weapon):
-    def __init__(self, damage_roll=D6(),attributes=["bleed"]):
+    def __init__(self, damage_roll=[1,6],attributes=["bleed"]):
         super().__init__(damage_roll,attributes)
 
 class Mace(Weapon):
-    def __init__(self,damage_roll=D8(),attributes=["bash"]:
+    def __init__(self,damage_roll=[1,6],attributes=["stun"]):
         super().__init__(damage_roll,attributes)
 
 class Scythe(Weapon):
-    def __init__(self,damage_roll=D8(),attributes=["poison"]):
+    def __init__(self,damage_roll=[1,8],attributes=["poison"]):
         super().__init__(damage_roll,attributes)
     
     
     
 #Sets the Enemy class based on Character, designating name, strenth(dam),defense,health. Also defines the attack
 class Enemy(Character):
-    def __init__(self, name, strength, defense, health):
+    def __init__(self, name, strength, evasion, health, status_effects):
         super().__init__(health)
+        self.status_effects = status_effects
         self.name = name
         self.strength = strength
-        self.defense = defense
+        self.evasion = evasion
         
     def attack(self,target):
         target.health -= self.strength
         
 class Goblin(Enemy):
-    def __init__(self, name = "goblin", strength = D6(), defense = 8, health = 11):
-        super().__init__(name,strength,defense,health)
+    def __init__(self, name = "goblin", strength = D6(), evasion = 8, health = 11, status_effects = []):
+        super().__init__(name,strength,evasion,health,status_effects)
 
     def attack(self,target):
-        target.health -= D6()
-
+        if "poisoned" in self.status_effects:
+            print("The {0.name} takes damage from poison".format(self))
+            self.health -= D4()
+            self.status_effects.remove("poisoned")
+        if "bleeding" in self.status_effects:
+            print("The {0.name} takes damage from bleeding".format(self))
+            self.health -= D4()
+            self.status_effects.remove("bleeding")
+        if "stunned" not in self.status_effects:
+            target.health -= D6()
+        else:
+            print("The {0.name} is stunned.".format(self))
+            self.status_effects.remove("stunned")
 
 def battle(player,enemy):
-    print("An enemy {0.name} appears with a defense of {0.defense}".format(enemy))
+    print("An enemy {0.name} appears with a defense of {0.evasion}".format(enemy))
     #Combat loop
     while player.health > 0 and enemy.health > 0:
         player_hit_chance = D20()
@@ -96,7 +115,7 @@ def battle(player,enemy):
         if enemy.health <= 0:
             break
         enemy_hit_chance = D20()
-        if enemy_hit_chance >= player.defense:
+        if enemy_hit_chance >= player.evasion:
             print("The {0.name} attacks you".format(enemy))
             enemy.attack(player)
         else:
@@ -139,5 +158,5 @@ def new_battle(player,enemy):
         if enemy.health <= 0:
             break
         enemy_hit_chance = D20()
-        if enemy_hit_chance >= player.defense:
+        if enemy_hit_chance >= player.evasion:
             print("The {0.name} attacks you".format(enemy))
