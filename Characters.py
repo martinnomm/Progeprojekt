@@ -12,7 +12,9 @@ class Player(Character):
 
     def __init__(self,health=12):
         self.chosen_weapon = None
+        self.current_area = Start_Area
         super().__init__(health)
+
     evasion = 12
     strength = D8()
     def attack(self, target, hit_chance):
@@ -78,19 +80,8 @@ class Goblin(Enemy):
         super().__init__(name,strength,evasion,health,status_effects)
 
     def attack(self,target):
-        if "poisoned" in self.status_effects:
-            print("The {0.name} takes damage from poison".format(self))
-            self.health -= D4()
-            self.status_effects.remove("poisoned")
-        if "bleeding" in self.status_effects:
-            print("The {0.name} takes damage from bleeding".format(self))
-            self.health -= D4()
-            self.status_effects.remove("bleeding")
-        if "stunned" not in self.status_effects:
-            target.health -= D6()
-        else:
-            print("The {0.name} is stunned.".format(self))
-            self.status_effects.remove("stunned")
+        target.health -= D6()
+
 
 def battle(player,enemy):
     print("An enemy {0.name} appears with a defense of {0.evasion}".format(enemy))
@@ -115,11 +106,24 @@ def battle(player,enemy):
         if enemy.health <= 0:
             break
         enemy_hit_chance = D20()
-        if enemy_hit_chance >= player.evasion:
-            print("The {0.name} attacks you".format(enemy))
-            enemy.attack(player)
+        if "stunned" in enemy.status_effects:
+            print("The {0.name} is stunned.".format(enemy))
+            enemy.status_effects.remove("stunned")
         else:
-            print("The {0.name} misses their attack.".format(enemy))
+            if enemy_hit_chance >= player.evasion:
+                print("The {0.name} attacks you".format(enemy))
+                enemy.attack(player)
+            else:
+                print("The {0.name} misses their attack.".format(enemy))
+        if "poisoned" in enemy.status_effects:
+            print("The {0.name} takes damage from poison".format(enemy))
+            enemy.health -= D4()
+            enemy.status_effects.remove("poisoned")
+        if "bleeding" in enemy.status_effects:
+            print("The {0.name} takes damage from bleeding".format(enemy))
+            enemy.health -= D4()
+            enemy.status_effects.remove("bleeding")
+            print(enemy.health)
         if player.health <= 0:
             break
         else:
@@ -160,3 +164,92 @@ def new_battle(player,enemy):
         enemy_hit_chance = D20()
         if enemy_hit_chance >= player.evasion:
             print("The {0.name} attacks you".format(enemy))
+
+
+############## Dungeon Area ###################
+
+def Game_end():
+    print("GAME OVER")
+
+def Go_Start():
+    player.current_area = Start_Area
+    if "start" not in visited_areas:
+        visited_areas.append("Start_Area")
+        print("You come upon a door leading to the Dungeon")
+        sleep(0.5)
+        print("Do you enter the door or leave? y/n")
+        vastus = input()
+        while vastus not in ["y","n"]:
+            print("Not understood, re-enter your answer")
+            vastus = input()
+        if vastus == "y":
+            Go_Room1()
+        if vastus == "n":
+            print("You decide that the Dungeon is too much of a task to handle.")
+            print("Not everyone is meant to be an adventurer.")
+            Game_End()
+
+
+def Go_Room1():
+    pass
+
+def Go_Room1W():
+    pass
+
+def Go_Room1E():
+    pass
+
+def Go_Start_Area():
+    pass
+
+def Go_Room2E():
+    pass
+
+def Go_Room1N():
+    pass
+
+def Go_Room2N():
+    pass
+
+def Go_RoomBoss():
+    pass
+
+
+class Area:
+    def __init__(self,North,East,South,West):
+        self.North = North
+        self.East = East
+        self.South = South
+        self.West = West
+
+class Start_Area(Area):
+    def __init__(self,North=Go_Room1(),East=None,South=None,West=None):
+        super.__init__(North,East,South,West)
+
+class Room1_Area(Area):
+    def __init__(self,North=Go_Room1N(),East=Go_Room1E(),South=Go_Start_Area(),West=Go_Room1W()):
+        super.__init__(North,East,South,West)
+
+class Room1W_Area(Area):
+    def __init__(self,North=None,East=Go_Room1(),South=None,West=None):
+        super.__init__(North,East,South,West)
+
+class Room1E_Area(Area):
+    def __init__(self,North=Go_Room2E(),East=None,South=None,West=Go_Room1()):
+        super.__init__(North,East,South,West)
+
+class Room1N_Area(Area):
+    def __init__(self,North=Go_Room2N(),East=None,South=Go_Room1(),West=None):
+        super.__init__(North,East,South,West)
+
+class Room2N_Area(Area):
+    def __init__(self,North=Go_RoomBoss(),East=None,South=Go_Room1N(),West=None):
+        super.__init__(North,East,South,West)
+
+class RoomBoss_Area(Area):
+    def __init__(self,North=None,East=None,South=Go_Room2N(),West=None):
+        super.__init__(North,East,South,West)
+
+
+
+###############################################################

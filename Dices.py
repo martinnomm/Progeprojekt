@@ -18,3 +18,5 @@ def D12():
 def D20():
     return randint(1,20)
 
+def D100():
+    return randint(1,100)

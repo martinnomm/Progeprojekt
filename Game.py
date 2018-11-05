@@ -5,7 +5,7 @@ import time
 
 playerlist = [Player()]
 player = playerlist[0]
-
+visited_areas = []
 def fight():
     battle(player, Goblin())
 
