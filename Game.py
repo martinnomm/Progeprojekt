@@ -36,3 +36,7 @@ while True:
 
 while True:
     player.current_area.show_actions()
+    if player.Game_Over is not None:
+        if player.Game_Over == "Leave":
+            print("You decide to leave the Dungeon")
+            break
