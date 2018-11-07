@@ -32,3 +32,7 @@ while True:
 
 
 Go_Start_Area()
+
+
+while True:
+    player.current_area.show_actions()

@@ -2,22 +2,29 @@ from time import *
 from Dices import *
 
 #Sets the base Character class with only health
+
+
 class Character:
 
     def __init__(self,health):
         self.health = health
+
+
 visited_areas =[]
 
 #Sets the Player class based on Character, designating the correct health. Also defines the attack
+
+
 class Player(Character):
 
-    def __init__(self,health=12):
+    def __init__(self, health=12):
         self.chosen_weapon = None
-        self.current_area = Start_Area
+        self.current_area = not_visited_areas["Start"]
         super().__init__(health)
 
     evasion = 12
     strength = D8()
+
     def attack(self, target, hit_chance):
         #print("To attack press ENTER, type to not attack")
         #answer = input("")
@@ -45,10 +52,13 @@ class Player(Character):
 #
 #
 #Template weapons as a test
+
+
 class Weapon:
     def __init__(self,damage_roll,attributes):
         self.damage_roll = damage_roll
         self.attributes = attributes
+
 
 class Stiletto(Weapon):
     def __init__(self, damage_roll=[1,6],attributes=["bleed"]):
@@ -62,9 +72,9 @@ class Scythe(Weapon):
     def __init__(self,damage_roll=[1,8],attributes=["poison"]):
         super().__init__(damage_roll,attributes)
     
-    
-    
+
 #Sets the Enemy class based on Character, designating name, strenth(dam),defense,health. Also defines the attack
+
 class Enemy(Character):
     def __init__(self, name, strength, evasion, health, status_effects):
         super().__init__(health)
@@ -75,12 +85,13 @@ class Enemy(Character):
         
     def attack(self,target):
         target.health -= self.strength
-        
-class Goblin(Enemy):
-    def __init__(self, name = "goblin", strength = D6(), evasion = 8, health = 11, status_effects = []):
-        super().__init__(name,strength,evasion,health,status_effects)
 
-    def attack(self,target):
+
+class Goblin(Enemy):
+    def __init__(self, name="goblin", strength=D6(), evasion=8, health=11, status_effects =[]):
+        super().__init__(name, strength, evasion, health, status_effects)
+
+    def attack(self, target):
         target.health -= D6()
 
 
@@ -91,7 +102,7 @@ def battle(player,enemy):
         player_hit_chance = D20()
         action = input("Do you want to attack, flee or do nothing? (attack,flee,ENTER)")
         if action.lower() == "attack":
-            player.attack(enemy,player_hit_chance)
+            player.attack(enemy, player_hit_chance)
         elif action.lower() == "flee":
             if D20() > 10:
                 print("You flee the fight")
@@ -137,40 +148,12 @@ def battle(player,enemy):
     elif player.health <= 0:
         print("The {0.name} killed you.".format(enemy))
 
-def new_battle(player,enemy):
-    print("An enemy {0.name} appears".format(enemy))
-    while player.health and enemy.health > 0:
-        player_hit_chance = D20()
-        print("attack or flee or defend")
-        action = input()
-        if action == "attack":
-            sleep(1)
-            player_defense = 0
-            player.attack(enemy, player_hit_chance)
-        elif action == "flee":
-            player_defense = 0
-            sleep(1)
-            if D20() > 10:
-                print("You flee the fight")
-                break
-            else:
-                print("Failed to flee")
-        elif action == "defend":
-            player_defense = D4()
-        else:
-            print("Not understood, doing nothing")
-
-        if enemy.health <= 0:
-            break
-        enemy_hit_chance = D20()
-        if enemy_hit_chance >= player.evasion:
-            print("The {0.name} attacks you".format(enemy))
-
-
 ############## Dungeon Area ###################
+
 
 def Game_end():
     print("GAME OVER")
+
 
 def Go_Start_Area():
     Player.current_area = "Start_Area"
@@ -191,8 +174,6 @@ def Go_Start_Area():
             Game_end()
 
 
-
-
 def Go_Room1():
     Player.current_area = "Room1_Area"
     if "Room1_Area" not in visited_areas or "Room1_Area" in visited_areas:
@@ -204,13 +185,22 @@ def Go_Room1():
             print("Not understood, repeat")
             vastus = input()
         if vastus.lower() in ["n","north"]:
-            Go_Room1N()
+            if player.chosen_weapon != None:
+                Go_Room1N()
+            else:
+                print("Need weapon fist")
         if vastus.lower() in ["e","east"]:
-            Go_Room1E()
+            if player.chosen_weapon != None:
+                Go_Room1E()
+            else:
+                print("Need weapon first")
         if vastus.lower() in ["w","west"]:
             Go_Room1W()
         if vastus.lower() in ["s","south"]:
-            Go_Start_Area()
+            if "RoomBoss_Area" in visited_areas:
+                Go_Start_Area()
+            else:
+                print("Door locked")
 
 def Go_Room1W():
     Player.current_area = "Room1W_Area"
@@ -299,51 +289,79 @@ def Go_RoomBoss():
             Go_Room2N()
 
 
-
-
 class Area:
-    def __init__(self,Directions,Actions):
+    def __init__(self, Directions, Actions):
         self.Directions = Directions
         self.Actions = Actions
 
+
 class Start_Area(Area):
-    def __init__(self,Directions=["Room1",None,None,None],Actions=None):
-        super().__init__(Directions,Actions)
+    def __init__(self, Directions=["Room1", None, None, None], Actions=None):
+        super().__init__(Directions, Actions)
+
+    def show_actions(self):
+        for i in range(4):
+            if self.Directions[i] != None:
+                print("You can move to: " + self.Directions[i])
+                vastus = input()
+                while vastus.lower() not in ["n"]:
+                    print("Not understood")
+                    vastus = input()
+                if vastus.lower() == "n":
+                    player.current_area = not_visited_areas["Room1"]
+
 
 class Room1_Area(Area):
     def __init__(self,Directions=["Room1N","Room1E","Start","Room1W"],Actions=None):
         super().__init__(Directions,Actions)
 
+
 class Room1W_Area(Area):
-    def __init__(self,Directions=[None,"Room1",None,None],Actions=None):
+    def __init__(self, Directions = [None, "Room1", None, None], Actions = None):
         super().__init__(Directions,Actions)
+
 
 class Room1E_Area(Area):
-    def __init__(self,Directions=["Room2E",None,None,"Room1"],Actions=None):
+    def __init__(self, Directions = ["Room2E", None, None, "Room1"], Actions=None):
         super().__init__(Directions,Actions)
+
 
 class Room1N_Area(Area):
-    def __init__(self,Directions=["Room2N",None,"Room1",None],Actions=None):
+    def __init__(self, Directions = ["Room2N", None, "Room1", None], Actions = None):
         super().__init__(Directions,Actions)
+
 
 class Room2N_Area(Area):
-    def __init__(self,Directions=["RoomBoss",None,"Room1N",None],Actions=None):
+    def __init__(self, Directions = ["RoomBoss", None, "Room1N", None], Actions = None):
         super().__init__(Directions,Actions)
 
+
 class RoomBoss_Area(Area):
-    def __init__(self,Directions=[None,None,"Room2N",None],Actions=None):
+    def __init__(self, Directions = [None, None, "Room2N", None], Actions = None):
         super().__init__(Directions,Actions)
 
 
 ###############################################################
 
+visited_areas = []
+not_visited_areas = {"Start": Start_Area(), "Room1": Room1_Area(), "Room1W": Room1W_Area(), "Room1E": Room1E_Area(),
+                     "Room1N": Room1N_Area(), "Room2N": Room2N_Area(), "RoomBoss": RoomBoss_Area()}
+
+
+for arv in not_visited_areas:
+    suunad = []
+    for i in range(4):
+        if not_visited_areas[arv].Directions[i] != None:
+            suunad.append(not_visited_areas[arv].Directions[i])
+    print(suunad)
+
+
 playerlist = [Player()]
 player = playerlist[0]
-visited_areas = []
-not_visited_areas = [Start_Area(),Room1_Area(),Room1W_Area(),Room1E_Area(),Room1N_Area(),Room2N_Area(),RoomBoss_Area()]
+
+
 def fight():
     battle(player, Goblin())
-
 
 
 #enemies = [Enemy("Goblin", D4(), 8, 11)]
@@ -357,22 +375,16 @@ def choose_weapon():
         print("Choose weapon: stiletto or mace or scythe")
         answer = input()
     if answer.lower() == "mace":
-        newanswer = Mace()
+        new_answer = Mace()
     elif answer.lower() == "stiletto":
-        newanswer = Stiletto()
+        new_answer = Stiletto()
     elif answer.lower() == "scythe":
-        newanswer = Scythe()
+        new_answer = Scythe()
+    player.chosen_weapon = new_answer
 
-    player.chosen_weapon = newanswer
 
-
-def Actual_Game():
+def actual_game():
     pass
 
 
-for arv in not_visited_areas:
-    suunad = []
-    for i in range(4):
-        if arv.Directions[i] != None:
-            suunad.append(arv.Directions[i])
-    print(suunad)
+
