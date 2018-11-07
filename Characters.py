@@ -6,6 +6,7 @@ class Character:
 
     def __init__(self,health):
         self.health = health
+visited_areas =[]
 
 #Sets the Player class based on Character, designating the correct health. Also defines the attack
 class Player(Character):
@@ -171,9 +172,9 @@ def new_battle(player,enemy):
 def Game_end():
     print("GAME OVER")
 
-def Go_Start():
-    player.current_area = Start_Area
-    if "start" not in visited_areas:
+def Go_Start_Area():
+    Player.current_area = "Start_Area"
+    if "Start_Area" not in visited_areas or "Start_Area" in visited_areas:
         visited_areas.append("Start_Area")
         print("You come upon a door leading to the Dungeon")
         sleep(0.5)
@@ -187,69 +188,191 @@ def Go_Start():
         if vastus == "n":
             print("You decide that the Dungeon is too much of a task to handle.")
             print("Not everyone is meant to be an adventurer.")
-            Game_End()
+            Game_end()
+
+
 
 
 def Go_Room1():
-    pass
+    Player.current_area = "Room1_Area"
+    if "Room1_Area" not in visited_areas or "Room1_Area" in visited_areas:
+        visited_areas.append("Room1_Area")
+        print("You enter Room1")
+        print("You can go North, East, South, West")
+        vastus = input()
+        while vastus.lower() not in ["n","e","s","w","west","north","east","south"]:
+            print("Not understood, repeat")
+            vastus = input()
+        if vastus.lower() in ["n","north"]:
+            Go_Room1N()
+        if vastus.lower() in ["e","east"]:
+            Go_Room1E()
+        if vastus.lower() in ["w","west"]:
+            Go_Room1W()
+        if vastus.lower() in ["s","south"]:
+            Go_Start_Area()
 
 def Go_Room1W():
-    pass
+    Player.current_area = "Room1W_Area"
+    if "Room1W" not in visited_areas or "Room1W" in visited_areas:
+        visited_areas.append("Room1W_Area")
+        print("You enter Room1W")
+        print("You find a stash of weapons.")
+        choose_weapon()
+        print("You can go East")
+        vastus = input()
+        while vastus.lower() not in ["e","east"]:
+            print("Not understood, repeat")
+            vastus = input()
+        if vastus.lower() in ["e","east"]:
+            Go_Room1()
 
 def Go_Room1E():
-    pass
-
-def Go_Start_Area():
-    pass
+    Player.current_area = "Room1E_Area"
+    if True:
+        visited_areas.append("Room1E_Area")
+        print("You enter Room1E")
+        print("You can go North, West")
+        vastus = input()
+        while vastus.lower() not in ["w","west","n","north"]:
+            print("Not understood, repeat")
+            vastus = input()
+        if vastus.lower() in ["n","north"]:
+            Go_Room2E()
+        if vastus.lower() in ["w","west"]:
+            Go_Room1()
 
 def Go_Room2E():
-    pass
+    Player.current_area = "Room2E_Area"
+    if True:
+        visited_areas.append("Room2E_Area")
+        print("You enter Room2E")
+        print("You can go South")
+        vastus = input()
+        while vastus.lower() not in ["s","south"]:
+            print("Not understood, repeat")
+            vastus = input()
+        if vastus.lower() in ["s","south"]:
+            Go_Room1E()
 
 def Go_Room1N():
-    pass
+    Player.current_area = "Room1N_Area"
+    if True:
+        visited_areas.append("Room1N_Area")
+        print("You enter Room1N")
+        print("You can go North, South")
+        vastus = input()
+        while vastus.lower() not in ["s", "south", "n", "north"]:
+            print("Not understood, repeat")
+            vastus = input()
+        if vastus.lower() in ["n", "north"]:
+            Go_Room2N()
+        if vastus.lower() in ["s", "south"]:
+            Go_Room1()
 
 def Go_Room2N():
-    pass
+    Player.current_area = "Room2N_Area"
+    if True:
+        visited_areas.append("Room2N_Area")
+        print("You enter Room2N")
+        print("You can go North, South")
+        vastus = input()
+        while vastus.lower() not in ["s", "south", "n", "north"]:
+            print("Not understood, repeat")
+            vastus = input()
+        if vastus.lower() in ["n", "north"]:
+            Go_RoomBoss()
+        if vastus.lower() in ["s", "south"]:
+            Go_Room1N()
 
 def Go_RoomBoss():
-    pass
+    Player.current_area = "RoomBoss_Area"
+    if True:
+        visited_areas.append("RoomBoss_Area")
+        print("You enter RoomBoss")
+        print("You can go South")
+        vastus = input()
+        while vastus.lower() not in ["s","south"]:
+            print("Not understood, repeat")
+            vastus = input()
+        if vastus.lower() in ["s", "south"]:
+            Go_Room2N()
+
+
 
 
 class Area:
-    def __init__(self,North,East,South,West):
-        self.North = North
-        self.East = East
-        self.South = South
-        self.West = West
+    def __init__(self,Directions,Actions):
+        self.Directions = Directions
+        self.Actions = Actions
 
 class Start_Area(Area):
-    def __init__(self,North=Go_Room1(),East=None,South=None,West=None):
-        super.__init__(North,East,South,West)
+    def __init__(self,Directions=["Room1",None,None,None],Actions=None):
+        super().__init__(Directions,Actions)
 
 class Room1_Area(Area):
-    def __init__(self,North=Go_Room1N(),East=Go_Room1E(),South=Go_Start_Area(),West=Go_Room1W()):
-        super.__init__(North,East,South,West)
+    def __init__(self,Directions=["Room1N","Room1E","Start","Room1W"],Actions=None):
+        super().__init__(Directions,Actions)
 
 class Room1W_Area(Area):
-    def __init__(self,North=None,East=Go_Room1(),South=None,West=None):
-        super.__init__(North,East,South,West)
+    def __init__(self,Directions=[None,"Room1",None,None],Actions=None):
+        super().__init__(Directions,Actions)
 
 class Room1E_Area(Area):
-    def __init__(self,North=Go_Room2E(),East=None,South=None,West=Go_Room1()):
-        super.__init__(North,East,South,West)
+    def __init__(self,Directions=["Room2E",None,None,"Room1"],Actions=None):
+        super().__init__(Directions,Actions)
 
 class Room1N_Area(Area):
-    def __init__(self,North=Go_Room2N(),East=None,South=Go_Room1(),West=None):
-        super.__init__(North,East,South,West)
+    def __init__(self,Directions=["Room2N",None,"Room1",None],Actions=None):
+        super().__init__(Directions,Actions)
 
 class Room2N_Area(Area):
-    def __init__(self,North=Go_RoomBoss(),East=None,South=Go_Room1N(),West=None):
-        super.__init__(North,East,South,West)
+    def __init__(self,Directions=["RoomBoss",None,"Room1N",None],Actions=None):
+        super().__init__(Directions,Actions)
 
 class RoomBoss_Area(Area):
-    def __init__(self,North=None,East=None,South=Go_Room2N(),West=None):
-        super.__init__(North,East,South,West)
-
+    def __init__(self,Directions=[None,None,"Room2N",None],Actions=None):
+        super().__init__(Directions,Actions)
 
 
 ###############################################################
+
+playerlist = [Player()]
+player = playerlist[0]
+visited_areas = []
+not_visited_areas = [Start_Area(),Room1_Area(),Room1W_Area(),Room1E_Area(),Room1N_Area(),Room2N_Area(),RoomBoss_Area()]
+def fight():
+    battle(player, Goblin())
+
+
+
+#enemies = [Enemy("Goblin", D4(), 8, 11)]
+
+
+def choose_weapon():
+    print("Choose weapon: stiletto or mace or scythe")
+    answer = input()
+    while answer.lower() not in ["mace","stiletto","scythe"]:
+        print("Not understood")
+        print("Choose weapon: stiletto or mace or scythe")
+        answer = input()
+    if answer.lower() == "mace":
+        newanswer = Mace()
+    elif answer.lower() == "stiletto":
+        newanswer = Stiletto()
+    elif answer.lower() == "scythe":
+        newanswer = Scythe()
+
+    player.chosen_weapon = newanswer
+
+
+def Actual_Game():
+    pass
+
+
+for arv in not_visited_areas:
+    suunad = []
+    for i in range(4):
+        if arv.Directions[i] != None:
+            suunad.append(arv.Directions[i])
+    print(suunad)

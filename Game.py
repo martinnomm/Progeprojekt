@@ -3,33 +3,10 @@ from Characters import *
 from random import randint
 import time
 
-playerlist = [Player()]
-player = playerlist[0]
-visited_areas = []
-def fight():
-    battle(player, Goblin())
 
-
-
-#enemies = [Enemy("Goblin", D4(), 8, 11)]
-
-
-def choose_weapon():
-    print("Choose weapon: stiletto or mace or scythe")
-    answer = input()
-    while answer.lower() not in ["mace","stiletto","scythe"]:
-        print("Not understood")
-        print("Choose weapon: stiletto or mace or scythe")
-        answer = input()
-    if answer.lower() == "mace":
-        newanswer = Mace()
-    elif answer.lower() == "stiletto":
-        newanswer = Stiletto()
-    elif answer.lower() == "scythe":
-        newanswer = Scythe()
-    player.chosen_weapon = newanswer
 
 while True:
+    break
     choose_weapon()
     print("Choose a direction(left or right) or fight")
     vastus = input("")
@@ -54,4 +31,4 @@ while True:
         time.sleep(1)
 
 
-
+Go_Start_Area()
