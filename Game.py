@@ -31,7 +31,7 @@ while True:
         time.sleep(1)
 
 
-Go_Start_Area()
+#Go_Start_Area()
 
 
 while True:

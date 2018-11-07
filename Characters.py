@@ -293,51 +293,64 @@ class Area:
     def __init__(self, Directions, Actions):
         self.Directions = Directions
         self.Actions = Actions
-
+    def show_actions(self):
+        mingid_suunad = []
+        for i in ["n","e","s","w"]:
+            if self.Directions[i] is not None:
+                mingid_suunad.append(i)
+        for suund in mingid_suunad:
+            print("You can move to: " + suund)
+        vastus = input()
+        while vastus.lower() not in mingid_suunad:
+            print("Not understood")
+            vastus = input()
+        if  vastus.lower() == "n":
+            player.current_area = not_visited_areas[player.current_area.Directions["n"]]
+        if  vastus.lower() == "e":
+            player.current_area = not_visited_areas[player.current_area.Directions["e"]]
+        if  vastus.lower() == "s":
+            player.current_area = not_visited_areas[player.current_area.Directions["s"]]
+        if  vastus.lower() == "w":
+            player.current_area = not_visited_areas[player.current_area.Directions["w"]]
 
 class Start_Area(Area):
-    def __init__(self, Directions=["Room1", None, None, None], Actions=None):
+    def __init__(self, Directions={"n": "Room1","e": None,"s": None,"w": None}, Actions=None):
         super().__init__(Directions, Actions)
 
-    def show_actions(self):
-        for i in range(4):
-            if self.Directions[i] != None:
-                print("You can move to: " + self.Directions[i])
-                vastus = input()
-                while vastus.lower() not in ["n"]:
-                    print("Not understood")
-                    vastus = input()
-                if vastus.lower() == "n":
-                    player.current_area = not_visited_areas["Room1"]
+
 
 
 class Room1_Area(Area):
-    def __init__(self,Directions=["Room1N","Room1E","Start","Room1W"],Actions=None):
+    def __init__(self,Directions={"n":"Room1N","e":"Room1E","s":"Start","w":"Room1W"},Actions=None):
         super().__init__(Directions,Actions)
 
 
 class Room1W_Area(Area):
-    def __init__(self, Directions = [None, "Room1", None, None], Actions = None):
+    def __init__(self, Directions = {"n":None, "e":"Room1", "s":None, "w":None}, Actions = None):
         super().__init__(Directions,Actions)
 
 
 class Room1E_Area(Area):
-    def __init__(self, Directions = ["Room2E", None, None, "Room1"], Actions=None):
+    def __init__(self, Directions = {"n":"Room2E", "e":None, "s":None, "w":"Room1"}, Actions=None):
+        super().__init__(Directions,Actions)
+
+class Room2E_Area(Area):
+    def __init__(self, Directions = {"n":None, "e":None, "s":"Room1E", "w":None}, Actions=None):
         super().__init__(Directions,Actions)
 
 
 class Room1N_Area(Area):
-    def __init__(self, Directions = ["Room2N", None, "Room1", None], Actions = None):
+    def __init__(self, Directions = {"n":"Room2N", "e":None, "s":"Room1", "w":None}, Actions = None):
         super().__init__(Directions,Actions)
 
 
 class Room2N_Area(Area):
-    def __init__(self, Directions = ["RoomBoss", None, "Room1N", None], Actions = None):
+    def __init__(self, Directions = {"n":"RoomBoss", "e":None, "s":"Room1N", "w":None}, Actions = None):
         super().__init__(Directions,Actions)
 
 
 class RoomBoss_Area(Area):
-    def __init__(self, Directions = [None, None, "Room2N", None], Actions = None):
+    def __init__(self, Directions = {"n":None, "e":None, "s":"Room2N", "w":None}, Actions = None):
         super().__init__(Directions,Actions)
 
 
@@ -345,15 +358,15 @@ class RoomBoss_Area(Area):
 
 visited_areas = []
 not_visited_areas = {"Start": Start_Area(), "Room1": Room1_Area(), "Room1W": Room1W_Area(), "Room1E": Room1E_Area(),
-                     "Room1N": Room1N_Area(), "Room2N": Room2N_Area(), "RoomBoss": RoomBoss_Area()}
+                     "Room2E": Room2E_Area(), "Room1N": Room1N_Area(), "Room2N": Room2N_Area(), "RoomBoss": RoomBoss_Area()}
 
 
-for arv in not_visited_areas:
-    suunad = []
-    for i in range(4):
-        if not_visited_areas[arv].Directions[i] != None:
-            suunad.append(not_visited_areas[arv].Directions[i])
-    print(suunad)
+#for arv in not_visited_areas:
+ #   suunad = []
+  #  for i in range(4):
+   #     if not_visited_areas[arv].Directions[i] != None:
+    #        suunad.append(not_visited_areas[arv].Directions[i])
+    #print(suunad)
 
 
 playerlist = [Player()]
