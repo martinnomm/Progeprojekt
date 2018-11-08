@@ -15,7 +15,7 @@ class Defensive_Spell:
 
 class Fireball(Offensive_Spell):
     def __init__(self,mana_cost = 20, type = 'fire', dmg = [1,6]):
-        super().__init__(mana_cost. type, dmg)
+        super().__init__(mana_cost, type, dmg)
 
 class Thunderbolt(Offensive_Spell):
     def __init__(self, mana_cost = 20, type = 'electric', dmg = [1,6]):

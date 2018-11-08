@@ -1,6 +1,6 @@
 from time import *
 from Dices import *
-
+from Spells import *
 #Sets the base Character class with only health
 
 
@@ -17,14 +17,18 @@ visited_areas =[]
 
 class Player(Character):
 
-    def __init__(self, health=12):
+    def __init__(self, health=12,):
+
         self.chosen_weapon = None
         self.current_area = not_visited_areas["Start"]
         super().__init__(health)
         self.Game_Over = None
         self.Inventory = []
+        self.mana = 100
+        self.xp = 0
     evasion = 12
     strength = D8()
+
 
     def attack(self, target, hit_chance):
         #print("To attack press ENTER, type to not attack")
@@ -77,20 +81,21 @@ class Scythe(Weapon):
 #Sets the Enemy class based on Character, designating name, strenth(dam),defense,health. Also defines the attack
 
 class Enemy(Character):
-    def __init__(self, name, strength, evasion, health, status_effects):
+    def __init__(self, name, strength, evasion, health, status_effects, weakness):
         super().__init__(health)
         self.status_effects = status_effects
         self.name = name
         self.strength = strength
         self.evasion = evasion
-        
+        self.weakness = weakness
+
     def attack(self,target):
         target.health -= self.strength
 
 
 class Goblin(Enemy):
-    def __init__(self, name="goblin", strength=D6(), evasion=8, health=11, status_effects =[]):
-        super().__init__(name, strength, evasion, health, status_effects)
+    def __init__(self, name="goblin", strength=D6(), evasion=8, health=11, status_effects =[], weakness = 'fire'):
+        super().__init__(name, strength, evasion, health, status_effects, weakness)
 
     def attack(self, target):
         target.health -= D6()
@@ -103,7 +108,24 @@ def battle(player,enemy):
         player_hit_chance = D20()
         action = input("Do you want to attack, flee or do nothing? (attack,flee,ENTER)")
         if action.lower() == "attack":
-            player.attack(enemy, player_hit_chance)
+            action_2 = input("Do you want to use a spell or melee attack? (spell, melee)")
+            if action_2.lower() == 'melee':
+                player.attack(enemy, player_hit_chance)
+
+            elif action_2.lower() == 'spell':
+                w_spell = input("Which spell would you like to use? (Fireball, Thunderbolt, Iceshard)")
+                if player.mana >= 20:
+                    if w_spell == 'Fireball':
+                        player.attack(enemy, player_hit_chance)
+                        player.mana -= Fireball().mana_cost
+                    elif w_spell == 'Thunderbolt':
+                        player.attack(enemy, player_hit_chance)
+                        player.mana -= Thunderbolt().mana_cost
+                    elif w_spell == 'Iceshard':
+                        player.attack(enemy, player_hit_chance)
+                        player.mana -= Iceshard().mana_cost
+                else:
+                    print("You do not have enough mana!")
         elif action.lower() == "flee":
             if D20() > 10:
                 print("You flee the fight")
@@ -145,7 +167,12 @@ def battle(player,enemy):
 
     #Display outcome
     if enemy.health <= 0:
+        player.xp += 14
+        player.mana = 100
+        xp_needed = 100 - player.xp
+
         print("You killed the {0.name}.".format(enemy))
+        print('You gained 14 xp,',xp_needed,'xp needed to gain a level')
     elif player.health <= 0:
         print("The {0.name} killed you.".format(enemy))
 
