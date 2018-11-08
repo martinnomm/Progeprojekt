@@ -173,6 +173,11 @@ class Area:
         choices.extend("x")
         choices.append("weapon")
         choices.append("get_key")
+        if None not in player.current_area.Actions:
+            if "fight" in player.current_area.Actions:
+                fight()
+                if player.health > 0:
+                    player.current_area.Actions.remove("fight")
         while vastus.lower() not in choices:
             print("Not understood")
             vastus = input()
@@ -252,7 +257,7 @@ class Room2N_Area(Area):
 
 
 class RoomBoss_Area(Area):
-    def __init__(self, Directions = {"n":None, "e":None, "s":"Room2N", "w":None}, Actions = ["Get_Key"]):
+    def __init__(self, Directions = {"n":None, "e":None, "s":"Room2N", "w":None}, Actions = ["Get_Key","fight"]):
         super().__init__(Directions,Actions)
 
 

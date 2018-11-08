@@ -30,10 +30,6 @@ while True:
         print("Not understood, you stay put")
         time.sleep(1)
 
-
-#Go_Start_Area()
-
-
 while True:
     player.current_area.show_actions()
     if player.Game_Over is not None:
