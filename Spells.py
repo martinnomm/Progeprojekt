@@ -16,15 +16,16 @@ class Defensive_Spell:
 class Fireball(Offensive_Spell):
     def __init__(self,mana_cost = 20, type = 'fire', dmg = [1,6]):
         super().__init__(mana_cost, type, dmg)
+        self.attribute = 'burn'
 
 class Thunderbolt(Offensive_Spell):
     def __init__(self, mana_cost = 20, type = 'electric', dmg = [1,6]):
         super().__init__(mana_cost,type,dmg)
-
+        self.attribute = 'paralyze'
 class Iceshard(Offensive_Spell):
     def __init__(self, mana_cost = 20, type = 'ice', dmg = [1,6]):
         super().__init__(mana_cost,type,dmg)
-
+        self.attribute = 'freeze'
 class Heal(Defensive_Spell):
     def __init__(self, mana_cost = 25, type = 'self-heal', effect = 'restore hp' ):
         super().__init__(mana_cost,type,effect)
@@ -32,6 +33,8 @@ class Heal(Defensive_Spell):
 class HealStatus(Defensive_Spell):
     def __init__(self, mana_cost = 15, type = 'self-heal', effect = 'heal status condition'):
         super().__init__(mana_cost,type,effect)
+
+
 
 
 

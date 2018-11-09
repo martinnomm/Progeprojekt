@@ -26,6 +26,7 @@ class Player(Character):
         self.Inventory = []
         self.mana = 100
         self.xp = 0
+        self.chosen_spell = None
     evasion = 12
     strength = D8()
 
@@ -46,6 +47,25 @@ class Player(Character):
                 target.status_effects.append("stunned")
             if "poison" in self.chosen_weapon.attributes:
                 target.status_effects.append("poisoned")
+
+    def spell_attack(self, target, hit_chance):
+
+        if hit_chance >= target.evasion:
+            print("You cast a spell on {0.name}".format(target))
+            print("Hit chance is {}.".format(hit_chance))
+            sleep(0.1)
+            print("Your spell hits the {0.name}".format(target))
+            target.health -= randint(self.chosen_spell.dmg[0], self.chosen_spell.dmg[1])
+                #Siin viskab errori 'str' object has no attribute 'dmg'
+            if 'burn' in self.chosen_spell.attribute:
+                target.status_effects.append('burned')
+
+            if 'paralyze' in self.chosen_spell.attribute:
+                target.status_effects.append('paralyzed')
+
+            if 'freeze' in self.chosen_spell.attribute:
+                target.status_effects.append('frozen')
+
 
         else:
             print("You miss your attack")
@@ -114,15 +134,16 @@ def battle(player,enemy):
 
             elif action_2.lower() == 'spell':
                 w_spell = input("Which spell would you like to use? (Fireball, Thunderbolt, Iceshard)")
+                player.chosen_spell = w_spell
                 if player.mana >= 20:
                     if w_spell == 'Fireball':
-                        player.attack(enemy, player_hit_chance)
+                        player.spell_attack(enemy, player_hit_chance)
                         player.mana -= Fireball().mana_cost
                     elif w_spell == 'Thunderbolt':
-                        player.attack(enemy, player_hit_chance)
+                        player.spell_attack(enemy, player_hit_chance)
                         player.mana -= Thunderbolt().mana_cost
                     elif w_spell == 'Iceshard':
-                        player.attack(enemy, player_hit_chance)
+                        player.spell_attack(enemy, player_hit_chance)
                         player.mana -= Iceshard().mana_cost
                 else:
                     print("You do not have enough mana!")
@@ -144,6 +165,10 @@ def battle(player,enemy):
         if "stunned" in enemy.status_effects:
             print("The {0.name} is stunned.".format(enemy))
             enemy.status_effects.remove("stunned")
+        elif 'frozen' in enemy.status_effects:
+            print("The {0.name} is frozen".format(enemy))
+        elif 'paralyzed' in enemy.status_effects:
+            print("The {0.name} is paralyzed".format(enemy))
         else:
             if enemy_hit_chance >= player.evasion:
                 print("The {0.name} attacks you".format(enemy))
@@ -159,6 +184,10 @@ def battle(player,enemy):
             enemy.health -= D4()
             enemy.status_effects.remove("bleeding")
             print(enemy.health)
+        if 'burned' in enemy.status_effects:
+            print("The {0.name} takes damage from burn".format(enemy))
+            enemy.health -= D4()
+            enemy.status_effects.remove('burned')
         if player.health <= 0:
             break
         else:
