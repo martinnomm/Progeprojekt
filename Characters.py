@@ -56,7 +56,7 @@ class Player(Character):
             print("Hit chance is {}.".format(hit_chance))
             sleep(0.1)
             print("Your spell hits the {0.name}".format(target))
-            target.health -= randint(self.chosen_spell().damg[0], self.chosen_spell().damg[1])
+            target.health -= randint(self.chosen_spell.damg[0], self.chosen_spell.damg[1])
                 #Siin viskab errori 'str' object has no attribute 'dmg'
             if 'burn' in self.chosen_spell.attribute:
                 target.status_effects.append('burned')
