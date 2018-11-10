@@ -134,7 +134,7 @@ def battle(player,enemy):
                 player.attack(enemy, player_hit_chance)
 
             if action_2.lower() == 'spell':
-                w_spell = input("Which spell would you like to use? (Fireball, Thunderbolt, Iceshard, Heal, Heal status)")
+                w_spell = input("Which spell would you like to use? (Fireball, Thunderbolt, Iceshard")
                 player.chosen_spell = w_spell
                 if player.mana >= 20:
                     if w_spell == 'Fireball':
