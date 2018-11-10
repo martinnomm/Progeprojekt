@@ -27,6 +27,7 @@ class Player(Character):
         self.mana = 100
         self.xp = 0
         self.chosen_spell = None
+        self.status = []
     evasion = 12
     strength = D8()
 
@@ -40,7 +41,7 @@ class Player(Character):
             print("Hit chance is {}.".format(hit_chance))
             sleep(0.1)
             print("Your attack hits the {0.name}".format(target))
-            target.health -= randint(self.chosen_weapon.damage_roll[0],self.chosen_weapon.damage_roll[1])
+            target.health -= randint(self.chosen_weapon.damage_roll[0], self.chosen_weapon.damage_roll[1])
             if "bleed" in self.chosen_weapon.attributes:
                 target.status_effects.append("bleeding")
             if "stun" in self.chosen_weapon.attributes:
@@ -55,7 +56,7 @@ class Player(Character):
             print("Hit chance is {}.".format(hit_chance))
             sleep(0.1)
             print("Your spell hits the {0.name}".format(target))
-            target.health -= randint(self.chosen_spell.dmg[0], self.chosen_spell.dmg[1])
+            target.health -= randint(self.chosen_spell().damg[0], self.chosen_spell().damg[1])
                 #Siin viskab errori 'str' object has no attribute 'dmg'
             if 'burn' in self.chosen_spell.attribute:
                 target.status_effects.append('burned')
@@ -132,8 +133,8 @@ def battle(player,enemy):
             if action_2.lower() == 'melee':
                 player.attack(enemy, player_hit_chance)
 
-            elif action_2.lower() == 'spell':
-                w_spell = input("Which spell would you like to use? (Fireball, Thunderbolt, Iceshard)")
+            if action_2.lower() == 'spell':
+                w_spell = input("Which spell would you like to use? (Fireball, Thunderbolt, Iceshard, Heal, Heal status)")
                 player.chosen_spell = w_spell
                 if player.mana >= 20:
                     if w_spell == 'Fireball':
@@ -145,6 +146,14 @@ def battle(player,enemy):
                     elif w_spell == 'Iceshard':
                         player.spell_attack(enemy, player_hit_chance)
                         player.mana -= Iceshard().mana_cost
+                    elif w_spell == 'Heal':
+                        player.mana -= Heal().mana_cost
+                        player.health += Heal().heal
+                        if player.health > 12:
+                            player.health = 12
+                    elif w_spell == 'Heal status':
+                        player.status.clear()
+                        print("All status effects have been removed.")
                 else:
                     print("You do not have enough mana!")
         elif action.lower() == "flee":
