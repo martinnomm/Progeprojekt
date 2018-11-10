@@ -127,7 +127,7 @@ def battle(player,enemy):
     #Combat loop
     while player.health > 0 and enemy.health > 0:
         player_hit_chance = D20()
-        action = input("Do you want to attack, flee or do nothing? (attack,flee,ENTER)")
+        action = input("Do you want to attack, flee, heal or do nothing? (attack,flee, heal, ENTER)")
         if action.lower() == "attack":
             action_2 = input("Do you want to use a spell or melee attack? (spell, melee)")
             if action_2.lower() == 'melee':
@@ -146,16 +146,22 @@ def battle(player,enemy):
                     elif w_spell == 'Iceshard':
                         player.spell_attack(enemy, player_hit_chance)
                         player.mana -= Iceshard().mana_cost
-                    elif w_spell == 'Heal':
-                        player.mana -= Heal().mana_cost
-                        player.health += Heal().heal
-                        if player.health > 12:
-                            player.health = 12
-                    elif w_spell == 'Heal status':
-                        player.status.clear()
-                        print("All status effects have been removed.")
+
                 else:
                     print("You do not have enough mana!")
+        elif action.lower() == 'heal':
+            action2 = input("Heal or heal status?")
+            if player.mana >= 25:
+                if action2.lower() == 'heal':
+                    player.mana -= Heal().mana_cost
+                    player.health += Heal().heal
+                    if player.health > 12:
+                        player.health = 12
+                elif action2.lower() == 'heal status':
+                    player.status.clear()
+                    print("All status effects have been removed.")
+            else:
+                print("You do not have enough mana")
         elif action.lower() == "flee":
             if D20() > 10:
                 print("You flee the fight")
