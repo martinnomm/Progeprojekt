@@ -1,10 +1,10 @@
 from random import randint
 class Offensive_Spell:
-   def __init__(self, mana_cost, type, dmg):
+   def __init__(self, mana_cost, type, damg):
 
        self.mana_cost = mana_cost
        self.type = type
-       self.dmg = dmg
+       self.damg = damg
 
 class Defensive_Spell:
     def __init__(self, mana_cost, type, effect):

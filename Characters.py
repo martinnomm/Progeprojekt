@@ -52,7 +52,7 @@ class Player(Character):
     def spell_attack(self, target, hit_chance):
 
         if hit_chance >= target.evasion:
-            print("You cast a spell on {0.name}".format(target))
+            print("You cast a spell on the {0.name}".format(target))
             print("Hit chance is {}.".format(hit_chance))
             sleep(0.1)
             print("Your spell hits the {0.name}".format(target))
@@ -135,15 +135,18 @@ def battle(player,enemy):
 
             if action_2.lower() == 'spell':
                 w_spell = input("Which spell would you like to use? (Fireball, Thunderbolt, Iceshard")
-                player.chosen_spell = w_spell
+
                 if player.mana >= 20:
                     if w_spell == 'Fireball':
+                        player.chosen_spell = Fireball()
                         player.spell_attack(enemy, player_hit_chance)
                         player.mana -= Fireball().mana_cost
                     elif w_spell == 'Thunderbolt':
+                        player.chosen_spell = Thunderbolt()
                         player.spell_attack(enemy, player_hit_chance)
                         player.mana -= Thunderbolt().mana_cost
                     elif w_spell == 'Iceshard':
+                        player.chosen_spell = Iceshard()
                         player.spell_attack(enemy, player_hit_chance)
                         player.mana -= Iceshard().mana_cost
 
