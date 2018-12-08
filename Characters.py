@@ -1,6 +1,9 @@
 from time import *
 from Dices import *
 from Spells import *
+from tkinter import *
+
+
 #Sets the base Character class with only health
 
 
@@ -380,149 +383,134 @@ def actual_game():
     pass
 
 
+def move_N():
+    if "weapon" in player.current_area.Actions:
+        btn.pack_forget()
+        btn2.pack_forget()
+        btn3.pack_forget()
+        btn4.pack_forget()
+        wpn1=Button(rw, text="Mace")
+        wpn1.pack()
+        wpn2=Button(rw,text="Stiletto")
+        wpn2.pack()
+        wpn3=Button(rw, text="Scythe")
+        wpn3.pack()
+        backb = Button(rw, text="Back")
+        backb.pack()
+        t = Text(rw, height=2, width=30)
+        t.insert(END, "Current weapon:" + player.chosen_weapon)
+        t.pack()
+    if player.current_area == not_visited_areas["Room1"]:
+        if player.chosen_weapon is None:
+            T=Text(rw, height=2, width=30)
+            T.insert(END, "This way seems dangerous. You need a weapon to be safe.")
+            T.pack()
+        else:
+            player.current_area = not_visited_areas[player.current_area.Directions["n"]]
+    else:
+        player.current_area = not_visited_areas[player.current_area.Directions["n"]]
+
+
+def move_E():
+    if "weapon" in player.current_area.Actions:
+        btn.pack_forget()
+        btn2.pack_forget()
+        btn3.pack_forget()
+        btn4.pack_forget()
+        wpn1=Button(rw, text="Mace")
+        wpn1.pack()
+        wpn2=Button(rw,text="Stiletto")
+        wpn2.pack()
+        wpn3=Button(rw, text="Scythe")
+        wpn3.pack()
+        backb = Button(rw, text="Back")
+        backb.pack()
+        t = Text(rw, height=2, width=30)
+        t.insert(END, "Current weapon:" + player.chosen_weapon)
+        t.pack()
+    if player.current_area == not_visited_areas["Room1"]:
+        if player.chosen_weapon is None:
+            T = Text(rw, height=2, width=30)
+            T.insert(END, "This way seems dangerous. You need a weapon to be safe.")
+            T.pack()
+        else:
+            player.current_area = not_visited_areas[player.current_area.Directions["e"]]
+    else:
+        player.current_area = not_visited_areas[player.current_area.Directions["e"]]
+
+def move_S():
+    if "weapon" in player.current_area.Actions:
+        btn.pack_forget()
+        btn2.pack_forget()
+        btn3.pack_forget()
+        btn4.pack_forget()
+        wpn1=Button(rw, text="Mace")
+        wpn1.pack()
+        wpn2=Button(rw,text="Stiletto")
+        wpn2.pack()
+        wpn3=Button(rw, text="Scythe")
+        wpn3.pack()
+        backb=Button(rw, text="Back")
+        backb.pack()
+        t= Text(rw, height=2, width=30)
+        t.insert(END, "Current weapon:")
+        t.pack()
+    if player.current_area == not_visited_areas["Room1"]:
+        if "key" not in player.Inventory:
+            T = Text(rw, height=2, width=30)
+            T.insert(END, "The door seems to have locked behind you. The key might be further ahead.")
+            T.pack()
+        else:
+            player.current_area = not_visited_areas[player.current_area.Directions["s"]]
+    else:
+        player.current_area = not_visited_areas[player.current_area.Directions["s"]]
+
+def move_W():
+    if "weapon" in player.current_area.Actions:
+        btn.pack_forget()
+        btn2.pack_forget()
+        btn3.pack_forget()
+        btn4.pack_forget()
+        wpn1=Button(rw, text="Mace", command=weapon_mace)
+        wpn1.pack()
+        wpn2=Button(rw,text="Stiletto", command=weapon_stiletto())
+        wpn2.pack()
+        wpn3=Button(rw, text="Scythe", command=weapon_scythe)
+        wpn3.pack()
+        backb = Button(rw, text="Back")
+        backb.pack()
+        t = Text(rw, height=2, width=30)
+        t.insert(END, "Current weapon:")
+        t.pack()
+    player.current_area = not_visited_areas[player.current_area.Directions["w"]]
+
+def weapon_mace():
+    player.chosen_weapon = Mace()
+
+def weapon_stiletto():
+    player.chosen_weapon = Stiletto()
+
+def weapon_scythe():
+    player.chosen_weapon = Scythe()
+    
+rw = Tk()
+btn=Button(rw, text="N")
+
+btn.pack()
+btn.config(command=move_N)
+btn2 = Button(rw, text="E")
+
+btn2.pack()
+btn2.config(command=move_E)
+btn3=Button(rw, text="S")
+
+btn3.pack()
+btn3.config(command=move_S)
+btn4=Button(rw, text="W")
+
+btn4.pack()
+btn4.config(command=move_W)
 
 
 
-######## OLD STUFF
-
-
-def Game_end():
-    print("GAME OVER")
-
-
-def Go_Start_Area():
-    Player.current_area = "Start_Area"
-    if "Start_Area" not in visited_areas or "Start_Area" in visited_areas:
-        visited_areas.append("Start_Area")
-        print("You come upon a door leading to the Dungeon")
-        sleep(0.5)
-        print("Do you enter the door or leave? y/n")
-        vastus = input()
-        while vastus not in ["y","n"]:
-            print("Not understood, re-enter your answer")
-            vastus = input()
-        if vastus == "y":
-            Go_Room1()
-        if vastus == "n":
-            print("You decide that the Dungeon is too much of a task to handle.")
-            print("Not everyone is meant to be an adventurer.")
-            Game_end()
-
-
-def Go_Room1():
-    Player.current_area = "Room1_Area"
-    if "Room1_Area" not in visited_areas or "Room1_Area" in visited_areas:
-        visited_areas.append("Room1_Area")
-        print("You enter Room1")
-        print("You can go North, East, South, West")
-        vastus = input()
-        while vastus.lower() not in ["n","e","s","w","west","north","east","south"]:
-            print("Not understood, repeat")
-            vastus = input()
-        if vastus.lower() in ["n","north"]:
-            if player.chosen_weapon != None:
-                Go_Room1N()
-            else:
-                print("Need weapon fist")
-        if vastus.lower() in ["e","east"]:
-            if player.chosen_weapon != None:
-                Go_Room1E()
-            else:
-                print("Need weapon first")
-        if vastus.lower() in ["w","west"]:
-            Go_Room1W()
-        if vastus.lower() in ["s","south"]:
-            if "RoomBoss_Area" in visited_areas:
-                Go_Start_Area()
-            else:
-                print("Door locked")
-
-def Go_Room1W():
-    Player.current_area = "Room1W_Area"
-    if "Room1W" not in visited_areas or "Room1W" in visited_areas:
-        visited_areas.append("Room1W_Area")
-        print("You enter Room1W")
-        print("You find a stash of weapons.")
-        choose_weapon()
-        print("You can go East")
-        vastus = input()
-        while vastus.lower() not in ["e","east"]:
-            print("Not understood, repeat")
-            vastus = input()
-        if vastus.lower() in ["e","east"]:
-            Go_Room1()
-
-def Go_Room1E():
-    Player.current_area = "Room1E_Area"
-    if True:
-        visited_areas.append("Room1E_Area")
-        print("You enter Room1E")
-        print("You can go North, West")
-        vastus = input()
-        while vastus.lower() not in ["w","west","n","north"]:
-            print("Not understood, repeat")
-            vastus = input()
-        if vastus.lower() in ["n","north"]:
-            Go_Room2E()
-        if vastus.lower() in ["w","west"]:
-            Go_Room1()
-
-def Go_Room2E():
-    Player.current_area = "Room2E_Area"
-    if True:
-        visited_areas.append("Room2E_Area")
-        print("You enter Room2E")
-        print("You can go South")
-        vastus = input()
-        while vastus.lower() not in ["s","south"]:
-            print("Not understood, repeat")
-            vastus = input()
-        if vastus.lower() in ["s","south"]:
-            Go_Room1E()
-
-def Go_Room1N():
-    Player.current_area = "Room1N_Area"
-    if True:
-        visited_areas.append("Room1N_Area")
-        print("You enter Room1N")
-        print("You can go North, South")
-        vastus = input()
-        while vastus.lower() not in ["s", "south", "n", "north"]:
-            print("Not understood, repeat")
-            vastus = input()
-        if vastus.lower() in ["n", "north"]:
-            Go_Room2N()
-        if vastus.lower() in ["s", "south"]:
-            Go_Room1()
-
-def Go_Room2N():
-    Player.current_area = "Room2N_Area"
-    if True:
-        visited_areas.append("Room2N_Area")
-        print("You enter Room2N")
-        print("You can go North, South")
-        vastus = input()
-        while vastus.lower() not in ["s", "south", "n", "north"]:
-            print("Not understood, repeat")
-            vastus = input()
-        if vastus.lower() in ["n", "north"]:
-            Go_RoomBoss()
-        if vastus.lower() in ["s", "south"]:
-            Go_Room1N()
-
-def Go_RoomBoss():
-    Player.current_area = "RoomBoss_Area"
-    if True:
-        visited_areas.append("RoomBoss_Area")
-        print("You enter RoomBoss")
-        print("You can go South")
-        vastus = input()
-        while vastus.lower() not in ["s","south"]:
-            print("Not understood, repeat")
-            vastus = input()
-        if vastus.lower() in ["s", "south"]:
-            Go_Room2N()
-
-###############
-            
-
+rw.mainloop()
