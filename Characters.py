@@ -1,3 +1,4 @@
+from sched import scheduler
 from time import *
 from Dices import *
 from Spells import *
@@ -362,6 +363,35 @@ def fight():
 
 #enemies = [Enemy("Goblin", D4(), 8, 11)]
 
+class buttonWeapons:
+    def __init__(self):
+        btnWeapons = Button(rw, text="Weapons", command=weapon_button())
+    def create(self):
+        self.btnWeapons.grid(row=6, column=3, columnspan=7)
+    def forget(self):
+        self.btnWeapons.grid_forget()
+
+class scytheButton:
+
+    def create(self):
+        btnScythe = Button(rw, text="Scythe", command=weapon_scythe())
+        btnScythe.grid(row=8, column=7, columnspan=8)
+    def forget(self):
+        btnScythe.grid_forget
+
+class stilettoButton:
+    def create(self):
+        btnStiletto = Button(rw, text="Stiletto", command=weapon_stiletto())
+        btnStiletto.grid(row=7, column=9, columnspan=8)
+    def forget(self):
+        btnStiletto.grid_forget
+
+class maceButton:
+    def create(self):
+        btnMace = Button(rw, text="Mace", command=weapon_mace())
+        btnMace.grid(row=6, column=9, columnspan=8)
+    def forget(self):
+        btnMace.grid_forget
 
 def choose_weapon():
     print("Choose weapon: stiletto or mace or scythe")
@@ -378,33 +408,32 @@ def choose_weapon():
         new_answer = Scythe()
     player.chosen_weapon = new_answer
 
+def remove_weapons():
+    maceButton.forget()
+    stilettoButton.forget()
+    scytheButton.forget()
+    buttonWeapons.create()
 
-def actual_game():
-    pass
 
+def weapons():
+    maceButton().create()
+    stilettoButton().create()
+    scytheButton().create()
+
+def weapon_button():
+    maceButton().create()
+    stilettoButton().create()
+    scytheButton().create()
 
 def move_N():
     if "weapon" in player.current_area.Actions:
-        btn.pack_forget()
-        btn2.pack_forget()
-        btn3.pack_forget()
-        btn4.pack_forget()
-        wpn1=Button(rw, text="Mace")
-        wpn1.pack()
-        wpn2=Button(rw,text="Stiletto")
-        wpn2.pack()
-        wpn3=Button(rw, text="Scythe")
-        wpn3.pack()
-        backb = Button(rw, text="Back")
-        backb.pack()
-        t = Text(rw, height=2, width=30)
-        t.insert(END, "Current weapon:" + player.chosen_weapon)
-        t.pack()
+        weapons()
     if player.current_area == not_visited_areas["Room1"]:
         if player.chosen_weapon is None:
-            T=Text(rw, height=2, width=30)
-            T.insert(END, "This way seems dangerous. You need a weapon to be safe.")
-            T.pack()
+            #T=Text(rw, height=2, width=30)
+            textbox.delete(1.0, END)
+            textbox.insert(END, "This way seems dangerous. You need a weapon to be safe.")
+            #T.pack()
         else:
             player.current_area = not_visited_areas[player.current_area.Directions["n"]]
     else:
@@ -413,26 +442,15 @@ def move_N():
 
 def move_E():
     if "weapon" in player.current_area.Actions:
-        btn.pack_forget()
-        btn2.pack_forget()
-        btn3.pack_forget()
-        btn4.pack_forget()
-        wpn1=Button(rw, text="Mace")
-        wpn1.pack()
-        wpn2=Button(rw,text="Stiletto")
-        wpn2.pack()
-        wpn3=Button(rw, text="Scythe")
-        wpn3.pack()
-        backb = Button(rw, text="Back")
-        backb.pack()
-        t = Text(rw, height=2, width=30)
-        t.insert(END, "Current weapon:" + player.chosen_weapon)
-        t.pack()
+        maceButton().forget()
+        scytheButton().forget()
+        stilettoButton().forget()
     if player.current_area == not_visited_areas["Room1"]:
         if player.chosen_weapon is None:
-            T = Text(rw, height=2, width=30)
-            T.insert(END, "This way seems dangerous. You need a weapon to be safe.")
-            T.pack()
+            #T = Text(rw, height=2, width=30)
+            textbox.delete(1.0, END)
+            textbox.insert(END, "This way seems dangerous. You need a weapon to be safe.")
+            #T.pack()
         else:
             player.current_area = not_visited_areas[player.current_area.Directions["e"]]
     else:
@@ -440,77 +458,96 @@ def move_E():
 
 def move_S():
     if "weapon" in player.current_area.Actions:
-        btn.pack_forget()
-        btn2.pack_forget()
-        btn3.pack_forget()
-        btn4.pack_forget()
-        wpn1=Button(rw, text="Mace")
-        wpn1.pack()
-        wpn2=Button(rw,text="Stiletto")
-        wpn2.pack()
-        wpn3=Button(rw, text="Scythe")
-        wpn3.pack()
-        backb=Button(rw, text="Back")
-        backb.pack()
-        t= Text(rw, height=2, width=30)
-        t.insert(END, "Current weapon:")
-        t.pack()
+        weapons()
     if player.current_area == not_visited_areas["Room1"]:
         if "key" not in player.Inventory:
-            T = Text(rw, height=2, width=30)
-            T.insert(END, "The door seems to have locked behind you. The key might be further ahead.")
-            T.pack()
+            #T = Text(rw, height=2, width=30)
+            textbox.delete(1.0, END)
+            textbox.insert(END, "The door seems to have locked behind you. The key might be further ahead.")
+            #T.pack()
         else:
             player.current_area = not_visited_areas[player.current_area.Directions["s"]]
     else:
         player.current_area = not_visited_areas[player.current_area.Directions["s"]]
 
 def move_W():
-    if "weapon" in player.current_area.Actions:
-        btn.pack_forget()
-        btn2.pack_forget()
-        btn3.pack_forget()
-        btn4.pack_forget()
-        wpn1=Button(rw, text="Mace", command=weapon_mace)
-        wpn1.pack()
-        wpn2=Button(rw,text="Stiletto", command=weapon_stiletto())
-        wpn2.pack()
-        wpn3=Button(rw, text="Scythe", command=weapon_scythe)
-        wpn3.pack()
-        backb = Button(rw, text="Back")
-        backb.pack()
-        t = Text(rw, height=2, width=30)
-        t.insert(END, "Current weapon:")
-        t.pack()
     player.current_area = not_visited_areas[player.current_area.Directions["w"]]
+
+    if "weapon" in player.current_area.Actions:
+        weapons()
+
+# def move_S():
+#     if "weapon" in player.current_area.Actions:
+#         btn.pack_forget()
+#         btn2.pack_forget()
+#         btn3.pack_forget()
+#         btn4.pack_forget()
+#         wpn1=Button(rw, text="Mace")
+#         wpn1.pack()
+#         wpn2=Button(rw,text="Stiletto")
+#         wpn2.pack()
+#         wpn3=Button(rw, text="Scythe")
+#         wpn3.pack()
+#         backb=Button(rw, text="Back")
+#         backb.pack()
+#         t= Text(rw, height=2, width=30)
+#         t.insert(END, "Current weapon:")
+#         t.pack()
+#     if player.current_area == not_visited_areas["Room1"]:
+#         if "key" not in player.Inventory:
+#             T = Text(rw, height=2, width=30)
+#             T.insert(END, "The door seems to have locked behind you. The key might be further ahead.")
+#             T.pack()
+#         else:
+#             player.current_area = not_visited_areas[player.current_area.Directions["s"]]
+#     else:
+# player.current_area = not_visited_areas[player.current_area.Directions["s"]]
 
 def weapon_mace():
     player.chosen_weapon = Mace()
+    textbox.delete(1.0, END)
+    textbox.insert(END, "You chose the mace, a weapon capable of stunning enmies.")
 
 def weapon_stiletto():
     player.chosen_weapon = Stiletto()
+    textbox.delete(1.0, END)
+    textbox.insert(END, "You chose the stiletto, a weapon for bleeding DOT damage.")
 
 def weapon_scythe():
     player.chosen_weapon = Scythe()
-    
+    textbox.delete(1.0, END)
+    textbox.insert(END, "You chose the scythe, a weapon covered with poisonous aura.")
+
+
 rw = Tk()
-btn=Button(rw, text="N")
 
-btn.pack()
-btn.config(command=move_N)
-btn2 = Button(rw, text="E")
+screen=Canvas(bg="lime")
+screen.grid(columnspan=30,rowspan=5)
 
-btn2.pack()
-btn2.config(command=move_E)
-btn3=Button(rw, text="S")
+btnN=Button(rw, text="N")
 
-btn3.pack()
-btn3.config(command=move_S)
-btn4=Button(rw, text="W")
+btnN.grid(column=2,row=6)
+btnN.config(command=move_N)
+btnE = Button(rw, text="E")
 
-btn4.pack()
-btn4.config(command=move_W)
+btnE.grid(column=3,row=7)
+btnE.config(command=move_E)
+btnS=Button(rw, text="S")
+
+btnS.grid(column=2,row=8)
+btnS.config(command=move_S)
+btnW=Button(rw, text="W")
+
+btnW.grid(column=1,row=7)
+btnW.config(command=move_W)
 
 
+textbox=Text(rw,height=4,width=25)
+textbox.insert(END,"This is a box of text")
+textbox.grid(column=28,row=6,sticky=E,rowspan=3)
 
 rw.mainloop()
+
+
+
+
