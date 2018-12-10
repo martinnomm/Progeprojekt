@@ -1,3 +1,4 @@
+from builtins import bool
 from sched import scheduler
 from time import *
 from Dices import *
@@ -363,35 +364,7 @@ def fight():
 
 #enemies = [Enemy("Goblin", D4(), 8, 11)]
 
-class buttonWeapons:
-    def __init__(self):
-        btnWeapons = Button(rw, text="Weapons", command=weapon_button())
-    def create(self):
-        self.btnWeapons.grid(row=6, column=3, columnspan=7)
-    def forget(self):
-        self.btnWeapons.grid_forget()
 
-class scytheButton:
-
-    def create(self):
-        btnScythe = Button(rw, text="Scythe", command=weapon_scythe())
-        btnScythe.grid(row=8, column=7, columnspan=8)
-    def forget(self):
-        btnScythe.grid_forget
-
-class stilettoButton:
-    def create(self):
-        btnStiletto = Button(rw, text="Stiletto", command=weapon_stiletto())
-        btnStiletto.grid(row=7, column=9, columnspan=8)
-    def forget(self):
-        btnStiletto.grid_forget
-
-class maceButton:
-    def create(self):
-        btnMace = Button(rw, text="Mace", command=weapon_mace())
-        btnMace.grid(row=6, column=9, columnspan=8)
-    def forget(self):
-        btnMace.grid_forget
 
 def choose_weapon():
     print("Choose weapon: stiletto or mace or scythe")
@@ -408,22 +381,42 @@ def choose_weapon():
         new_answer = Scythe()
     player.chosen_weapon = new_answer
 
-def remove_weapons():
-    maceButton.forget()
-    stilettoButton.forget()
-    scytheButton.forget()
-    buttonWeapons.create()
-
-
+#Sisenedes Room1W näitab weapon buttonid ja paneb nende commandid
 def weapons():
-    maceButton().create()
-    stilettoButton().create()
-    scytheButton().create()
+    btnTop.pack(fill=X,padx=10)
+    btnTop.config(text="Mace",command=weapon_mace)
+    btnMiddle.pack(fill=X,padx=10)
+    btnMiddle.config(text="Stiletto",command=weapon_stiletto)
+    btnBottom.pack(fill=X,padx=10)
+    btnBottom.config(text="Scythe",command=weapon_scythe)
 
-def weapon_button():
-    maceButton().create()
-    stilettoButton().create()
-    scytheButton().create()
+#Command, mis Room1W lahkudes peidab weapon nupud
+def hideWeapons():
+    btnTop.pack_forget()
+    btnMiddle.pack_forget()
+    btnBottom.pack_forget()
+
+#Checkmap command, mis ala kohta paneb õige minimapi display
+def checkMap():
+    global minimapImage
+    if player.current_area == not_visited_areas["Start"]:
+        minimapImage=PhotoImage(file="XpicRoomStart.png")
+    elif player.current_area == not_visited_areas["Room1"]:
+        minimapImage=PhotoImage(file="XpicRoom1.png")
+    elif player.current_area == not_visited_areas["Room1W"]:
+        minimapImage=PhotoImage(file="XpicRoom1W.png")
+    elif player.current_area == not_visited_areas["Room1E"]:
+        minimapImage=PhotoImage(file="XpicRoom1E.png")
+    elif player.current_area == not_visited_areas["Room2E"]:
+        minimapImage=PhotoImage(file="XpicRoom2E.png")
+    elif player.current_area == not_visited_areas["Room1N"]:
+        minimapImage=PhotoImage(file="XpicRoom1N.png")
+    elif player.current_area == not_visited_areas["Room2N"]:
+        minimapImage=PhotoImage(file="XpicRoom2N.png")
+    elif player.current_area == not_visited_areas["RoomBoss"]:
+        minimapImage=PhotoImage(file="XpicRoomBoss.png")
+    screen.create_image(0, 0, anchor=NW, image=minimapImage)
+
 
 def move_N():
     if "weapon" in player.current_area.Actions:
@@ -438,13 +431,11 @@ def move_N():
             player.current_area = not_visited_areas[player.current_area.Directions["n"]]
     else:
         player.current_area = not_visited_areas[player.current_area.Directions["n"]]
-
+    checkMap()
 
 def move_E():
     if "weapon" in player.current_area.Actions:
-        maceButton().forget()
-        scytheButton().forget()
-        stilettoButton().forget()
+        hideWeapons()
     if player.current_area == not_visited_areas["Room1"]:
         if player.chosen_weapon is None:
             #T = Text(rw, height=2, width=30)
@@ -455,10 +446,12 @@ def move_E():
             player.current_area = not_visited_areas[player.current_area.Directions["e"]]
     else:
         player.current_area = not_visited_areas[player.current_area.Directions["e"]]
+    checkMap()
 
 def move_S():
     if "weapon" in player.current_area.Actions:
         weapons()
+
     if player.current_area == not_visited_areas["Room1"]:
         if "key" not in player.Inventory:
             #T = Text(rw, height=2, width=30)
@@ -469,13 +462,24 @@ def move_S():
             player.current_area = not_visited_areas[player.current_area.Directions["s"]]
     else:
         player.current_area = not_visited_areas[player.current_area.Directions["s"]]
+    checkMap()
 
 def move_W():
     player.current_area = not_visited_areas[player.current_area.Directions["w"]]
 
     if "weapon" in player.current_area.Actions:
         weapons()
+    checkMap()
 
+#WASD movementi jaoks event commandid, suunavad tavalistele movement commandidele
+def go_N(event):
+    move_N()
+def go_W(event):
+    move_W()
+def go_S(event):
+    move_S()
+def go_E(event):
+    move_E()
 # def move_S():
 #     if "weapon" in player.current_area.Actions:
 #         btn.pack_forget()
@@ -521,30 +525,70 @@ def weapon_scythe():
 
 rw = Tk()
 
-screen=Canvas(bg="lime")
-screen.grid(columnspan=30,rowspan=5)
+#Tegin 2 suuremat frame, top ja bottom display ja alumise osa jaoks
+displayFrame=Frame(rw)
+displayFrame.grid(rowspan=2)
 
-btnN=Button(rw, text="N")
 
-btnN.grid(column=2,row=6)
+bottomFrame=Frame(rw)
+bottomFrame.grid()
+
+#3 frame, mis paigutatud bottom frame sisse(NESW nupud, Buttonite area, Textboxi area)
+navigationFrame=Frame(bottomFrame)
+navigationFrame.grid(column=0,row=0,sticky=W)
+
+buttonFrame=Frame(bottomFrame)
+buttonFrame.grid(column=1,row=0)
+
+textFrame=Frame(bottomFrame)
+textFrame.grid(column=2,row=0,sticky=E)
+
+screen=Canvas(displayFrame,bg="lime")
+screen.pack()
+
+btnN=Button(navigationFrame, text="N")
+btnN.grid(column=1,row=0)
 btnN.config(command=move_N)
-btnE = Button(rw, text="E")
 
-btnE.grid(column=3,row=7)
+btnE = Button(navigationFrame, text="E")
+btnE.grid(column=2,row=1)
 btnE.config(command=move_E)
-btnS=Button(rw, text="S")
 
-btnS.grid(column=2,row=8)
+btnS=Button(navigationFrame, text="S")
+btnS.grid(column=1,row=2)
 btnS.config(command=move_S)
-btnW=Button(rw, text="W")
 
-btnW.grid(column=1,row=7)
+btnW=Button(navigationFrame, text="W")
+btnW.grid(column=0,row=1)
 btnW.config(command=move_W)
 
+#Bindisin WASD keyboardilt map movementi jaoks
+rw.bind("w",go_N)
+rw.bind("a",go_W)
+rw.bind("d",go_E)
+rw.bind("s",go_S)
 
-textbox=Text(rw,height=4,width=25)
+#Tegin ühe textboxi, mille teksti saab korduvalt muuta(Check weapons or movement restricions for example)
+textbox=Text(textFrame,height=4,width=25)
 textbox.insert(END,"This is a box of text")
-textbox.grid(column=28,row=6,sticky=E,rowspan=3)
+textbox.pack()
+
+#Tegin alguses valmis kolme nupu variabled, mida muuta (3 weaponi jaoks hetkel, aga saab kasutada muu jaoks veel)
+btnTop=Button(buttonFrame, text="First Button")
+btnTop.pack(fill=X,padx=10)
+btnTop.pack_forget()
+
+btnMiddle=Button(buttonFrame, text="Second Button")
+btnMiddle.pack(fill=X,padx=10)
+btnMiddle.pack_forget()
+
+btnBottom=Button(buttonFrame, text="Third Button")
+btnBottom.pack(fill=X,padx=10)
+btnBottom.pack_forget()
+
+#Impordin starting are image minimapi jaoks
+minimapImage = PhotoImage(file="XpicRoomStart.png")
+screen.create_image(0,0,anchor=NW, image=minimapImage)
 
 rw.mainloop()
 
