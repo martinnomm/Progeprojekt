@@ -396,6 +396,19 @@ def hideWeapons():
     btnMiddle.pack_forget()
     btnBottom.pack_forget()
 
+def fightOptions():
+    textbox.delete(1.0, END)
+    textbox.insert(END, "You challenge the goblin to a fight")
+    btnN.pack_forget()
+    btnW.pack_forget()
+    btnE.pack_forget()
+    btnS.pack_forget()
+    btnTop.pack(fill=X, padx=10)
+    btnTop.config(text="Melee", command=weapon_mace)
+    btnMiddle.pack(fill=X, padx=10)
+    btnMiddle.config(text="Spell", command=weapon_stiletto)
+    btnBottom.pack(fill=X, padx=10)
+    btnBottom.config(text="Skip turn", command=weapon_scythe)
 #Checkmap command, mis ala kohta paneb õige minimapi display
 def checkMap():
     global minimapImage
@@ -419,6 +432,11 @@ def checkMap():
 
 
 def move_N():
+    #siin peaks fight algama aga ei kutsu esile
+    if "fight" in player.current_area.Actions:
+        fight()
+        if player.health > 0:
+            player.current_area.Actions.remove("fight")
     if "weapon" in player.current_area.Actions:
         weapons()
     if player.current_area == not_visited_areas["Room1"]:
@@ -429,8 +447,12 @@ def move_N():
             #T.pack()
         else:
             player.current_area = not_visited_areas[player.current_area.Directions["n"]]
+            textbox.delete(1.0, END)
+            textbox.insert(END, "You decided to move north")
     else:
         player.current_area = not_visited_areas[player.current_area.Directions["n"]]
+        textbox.delete(1.0, END)
+        textbox.insert(END, "You decided to move north")
     checkMap()
 
 def move_E():
@@ -444,8 +466,12 @@ def move_E():
             #T.pack()
         else:
             player.current_area = not_visited_areas[player.current_area.Directions["e"]]
+            textbox.delete(1.0, END)
+            textbox.insert(END, "You decided to move east")
     else:
         player.current_area = not_visited_areas[player.current_area.Directions["e"]]
+        textbox.delete(1.0, END)
+        textbox.insert(END, "You decided to move east")
     checkMap()
 
 def move_S():
@@ -460,13 +486,18 @@ def move_S():
             #T.pack()
         else:
             player.current_area = not_visited_areas[player.current_area.Directions["s"]]
+            textbox.delete(1.0, END)
+            textbox.insert(END, "You decided to move south")
     else:
         player.current_area = not_visited_areas[player.current_area.Directions["s"]]
+        textbox.delete(1.0, END)
+        textbox.insert(END, "You decided to move south")
     checkMap()
 
 def move_W():
     player.current_area = not_visited_areas[player.current_area.Directions["w"]]
-
+    textbox.delete(1.0, END)
+    textbox.insert(END, "You decided to move west")
     if "weapon" in player.current_area.Actions:
         weapons()
     checkMap()
@@ -588,7 +619,7 @@ btnBottom.pack_forget()
 
 #Impordin starting are image minimapi jaoks
 minimapImage = PhotoImage(file="XpicRoomStart.png")
-screen.create_image(0,0,anchor=NW, image=minimapImage)
+screen.create_image(2,1,anchor=NW, image=minimapImage)
 
 rw.mainloop()
 
