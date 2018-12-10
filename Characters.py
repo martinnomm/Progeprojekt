@@ -346,13 +346,6 @@ visited_areas = []
 not_visited_areas = {"Start": Start_Area(), "Room1": Room1_Area(), "Room1W": Room1W_Area(), "Room1E": Room1E_Area(),
                      "Room2E": Room2E_Area(), "Room1N": Room1N_Area(), "Room2N": Room2N_Area(), "RoomBoss": RoomBoss_Area()}
 
-#for arv in not_visited_areas:
- #   suunad = []
-  #  for i in range(4):
-   #     if not_visited_areas[arv].Directions[i] != None:
-    #        suunad.append(not_visited_areas[arv].Directions[i])
-    #print(suunad)
-
 
 playerlist = [Player()]
 player = playerlist[0]
@@ -411,24 +404,69 @@ def fightOptions():
     btnBottom.config(text="Skip turn", command=weapon_scythe)
 #Checkmap command, mis ala kohta paneb õige minimapi display
 def checkMap():
-    global minimapImage
+    global locationImage
+    global imgR1N, imgR1, imgStart, imgR1E, imgR1W, imgR2E, imgR2N, imgRBoss
+    if player.current_area not in visited_areas:
+        visited_areas.append(player.current_area)
     if player.current_area == not_visited_areas["Start"]:
-        minimapImage=PhotoImage(file="XpicRoomStart.png")
+        locationImage=PhotoImage(file="pictures/LocatedRoomStart.png")
+        imgStart = PhotoImage(file="pictures/ExploredRoomStart.png")
+        screen.create_image(1, 0, anchot=NW, image=imgStart)
     elif player.current_area == not_visited_areas["Room1"]:
-        minimapImage=PhotoImage(file="XpicRoom1.png")
+        locationImage=PhotoImage(file="pictures/LocatedRoom1.png")
+        imgR1 = PhotoImage(file="pictures/ExploredRoom1.png")
+        screen.create_image(1, 0, anchor=NW, image=imgR1)
     elif player.current_area == not_visited_areas["Room1W"]:
-        minimapImage=PhotoImage(file="XpicRoom1W.png")
+        locationImage=PhotoImage(file="pictures/LocatedRoom1W.png")
+        imgR1W = PhotoImage(file="pictures/ExploredRoom1W.png")
+        screen.create_image(1, 0, anchor=NW, image=imgR1W)
     elif player.current_area == not_visited_areas["Room1E"]:
-        minimapImage=PhotoImage(file="XpicRoom1E.png")
+        locationImage=PhotoImage(file="pictures/LocatedRoom1E.png")
+        imgR1E = PhotoImage(file="pictures/ExploredRoom1E.png")
+        screen.create_image(1, 0, anchor=NW, image=imgR1E)
     elif player.current_area == not_visited_areas["Room2E"]:
-        minimapImage=PhotoImage(file="XpicRoom2E.png")
+        locationImage=PhotoImage(file="pictures/LocatedRoom2E.png")
+        imgR2E = PhotoImage(file="pictures/ExploredRoom2E.png")
+        screen.create_image(1, 0, anchor=NW, image=imgR2E)
     elif player.current_area == not_visited_areas["Room1N"]:
-        minimapImage=PhotoImage(file="XpicRoom1N.png")
+        locationImage=PhotoImage(file="pictures/LocatedRoom1N.png")
+        imgR1N = PhotoImage(file="pictures/ExploredRoom1N.png")
+        screen.create_image(1, 0, anchor=NW, image=imgR1N)
     elif player.current_area == not_visited_areas["Room2N"]:
-        minimapImage=PhotoImage(file="XpicRoom2N.png")
+        locationImage=PhotoImage(file="pictures/LocatedRoom2N.png")
+        imgR2N = PhotoImage(file="pictures/ExploredRoom2N.png")
+        screen.create_image(1, 0, anchor=NW, image=imgR2N)
     elif player.current_area == not_visited_areas["RoomBoss"]:
-        minimapImage=PhotoImage(file="XpicRoomBoss.png")
-    screen.create_image(0, 0, anchor=NW, image=minimapImage)
+        locationImage=PhotoImage(file="pictures/LocatedRoomBoss.png")
+        imgRBoss = PhotoImage(file="pictures/ExploredRoomBoss.png")
+        screen.create_image(1, 0, anchor=NW, image=imgRBoss)
+    screen.create_image(1, 0, anchor=NW, image=locationImage)
+
+    if "Start" in visited_areas:
+        imgStart = PhotoImage(file="pictures/ExploredRoomStart.png")
+        screen.create_image(1,0,anchot=NW, image=imgStart)
+    if "Room1" in visited_areas:
+        imgR1 = PhotoImage(file="pictures/ExploredRoom1.png")
+        screen.create_image(1,0,anchor=NW, image=imgR1)
+    if "Room1W" in visited_areas:
+        imgR1W = PhotoImage(file="pictures/ExploredRoom1W.png")
+        screen.create_image(1,0,anchor=NW, image=imgR1W)
+    if "Room1" in visited_areas:
+        imgR1E = PhotoImage(file="pictures/ExploredRoom1E.png")
+        screen.create_image(1,0,anchor=NW, image=imgR1E)
+    if "Room2E" in visited_areas:
+        imgR2E = PhotoImage(file="pictures/ExploredRoom2E.png")
+        screen.create_image(1,0,anchor=NW, image=imgR2E)
+    if "Room1N" in visited_areas:
+        imgR1N = PhotoImage(file="pictures/ExploredRoom1N.png")
+        screen.create_image(1,0,anchor=NW, image=imgR1N)
+    if "Room2N" in visited_areas:
+        imgR2N = PhotoImage(file="pictures/ExploredRoom2N.png")
+        screen.create_image(1,0,anchor=NW, image=imgR2N)
+    if "RoomBoss" in visited_areas:
+        imgRBoss = PhotoImage(file="pictures/ExploredRoomBoss.png")
+        screen.create_image(1,0,anchor=NW, image=imgRBoss)
+
 
 
 def move_N():
@@ -511,32 +549,6 @@ def go_S(event):
     move_S()
 def go_E(event):
     move_E()
-# def move_S():
-#     if "weapon" in player.current_area.Actions:
-#         btn.pack_forget()
-#         btn2.pack_forget()
-#         btn3.pack_forget()
-#         btn4.pack_forget()
-#         wpn1=Button(rw, text="Mace")
-#         wpn1.pack()
-#         wpn2=Button(rw,text="Stiletto")
-#         wpn2.pack()
-#         wpn3=Button(rw, text="Scythe")
-#         wpn3.pack()
-#         backb=Button(rw, text="Back")
-#         backb.pack()
-#         t= Text(rw, height=2, width=30)
-#         t.insert(END, "Current weapon:")
-#         t.pack()
-#     if player.current_area == not_visited_areas["Room1"]:
-#         if "key" not in player.Inventory:
-#             T = Text(rw, height=2, width=30)
-#             T.insert(END, "The door seems to have locked behind you. The key might be further ahead.")
-#             T.pack()
-#         else:
-#             player.current_area = not_visited_areas[player.current_area.Directions["s"]]
-#     else:
-# player.current_area = not_visited_areas[player.current_area.Directions["s"]]
 
 def weapon_mace():
     player.chosen_weapon = Mace()
@@ -618,8 +630,12 @@ btnBottom.pack(fill=X,padx=10)
 btnBottom.pack_forget()
 
 #Impordin starting are image minimapi jaoks
-minimapImage = PhotoImage(file="XpicRoomStart.png")
-screen.create_image(2,1,anchor=NW, image=minimapImage)
+minimapBG = PhotoImage(file="pictures/Background.png")
+minimapImage = PhotoImage(file="pictures/ExploredRoomStart.png")
+locationImage = PhotoImage(file="pictures/LocatedRoomStart.png")
+screen.create_image(1,0,anchor=NW, image=minimapBG)
+screen.create_image(1,0,anchor=NW, image=minimapImage)
+screen.create_image(1,0,anchor=NW, image=locationImage)
 
 rw.mainloop()
 
