@@ -126,13 +126,33 @@ class Goblin(Enemy):
     def attack(self, target):
         target.health -= D6()
 
+def melee():
+    player.attack(enemy, player_hit_chance)
 
+def spell():
+
+
+    textbox.delete(1.0, END)
+    textbox.insert(END, "Which spell would you like to use?")
+    btnFireball=Button(navigationFrame)
+    btnFireball.pack(fill=X, padx=10)
+    btnFireball.config(text="Fireball", command=Fireball)
+    btnIceshard=Button(navigationFrame)
+    btnIceshard.pack(fill=X, padx=10)
+    btnIceshard.config(text="Iceshard", command=Iceshard)
+    btnThunderbolt=Button(navigationFrame)
+    btnThunderbolt.pack(fill=X, padx=10)
+    btnThunderbolt.config(text="Thunderbolt", command=Thunderbolt)
+    btnHeal=Button(navigationFrame)
+    btnHeal.pack(fill=X, padx=10)
+    btnHeal.config(text="Heal", command=Heal)
 def battle(player,enemy):
     print("An enemy {0.name} appears with a defense of {0.evasion}".format(enemy))
     #Combat loop
     while player.health > 0 and enemy.health > 0:
         player_hit_chance = D20()
-        action = input("Do you want to attack, flee, heal or do nothing? (attack,flee, heal, ENTER)")
+        textbox.delete(1.0, END)
+        textbox.insert(END, "Do you want to attack, use a spell or do nothing?")
         if action.lower() == "attack":
             action_2 = input("Do you want to use a spell or melee attack? (spell, melee)")
             if action_2.lower() == 'melee':
@@ -392,16 +412,19 @@ def hideWeapons():
 def fightOptions():
     textbox.delete(1.0, END)
     textbox.insert(END, "You challenge the goblin to a fight")
-    btnN.pack_forget()
-    btnW.pack_forget()
-    btnE.pack_forget()
-    btnS.pack_forget()
-    btnTop.pack(fill=X, padx=10)
-    btnTop.config(text="Melee", command=weapon_mace)
-    btnMiddle.pack(fill=X, padx=10)
-    btnMiddle.config(text="Spell", command=weapon_stiletto)
-    btnBottom.pack(fill=X, padx=10)
-    btnBottom.config(text="Skip turn", command=weapon_scythe)
+    btnN.grid_forget()
+    btnW.grid_forget()
+    btnE.grid_forget()
+    btnS.grid_forget()
+    btnAttack=Button(navigationFrame)
+    btnAttack.pack(fill=X, padx=10)
+    btnAttack.config(text="Melee", command=melee)
+    btnSpell=Button(navigationFrame)
+    btnSpell.pack(fill=X, padx=10)
+    btnSpell.config(text="Spell", command=spell)
+    btnSkip=Button(navigationFrame)
+    btnSkip.pack(fill=X, padx=10)
+    btnSkip.config(text="Skip turn", command=weapon_scythe)
 #Checkmap command, mis ala kohta paneb õige minimapi display
 def checkMap():
     global locationImage
@@ -471,10 +494,7 @@ def checkMap():
 
 def move_N():
     #siin peaks fight algama aga ei kutsu esile
-    if "fight" in player.current_area.Actions:
-        fight()
-        if player.health > 0:
-            player.current_area.Actions.remove("fight")
+
     if "weapon" in player.current_area.Actions:
         weapons()
     if player.current_area == not_visited_areas["Room1"]:
@@ -487,10 +507,26 @@ def move_N():
             player.current_area = not_visited_areas[player.current_area.Directions["n"]]
             textbox.delete(1.0, END)
             textbox.insert(END, "You decided to move north")
+            if player.current_area == not_visited_areas["Room1N"]:
+                textbox.delete(1.0, END)
+                textbox.insert(END, "There seems to be an angry looking green midget up ahead.")
+            if "fight" in player.current_area.Actions:
+                fightOptions()
+                fight()
+                if player.health > 0:
+                    player.current_area.Actions.remove("fight")
     else:
         player.current_area = not_visited_areas[player.current_area.Directions["n"]]
         textbox.delete(1.0, END)
         textbox.insert(END, "You decided to move north")
+        if player.current_area == not_visited_areas["Room1N"]:
+            textbox.delete(1.0, END)
+            textbox.insert(END, "There seems to be an angry looking green midget up ahead.")
+        if "fight" in player.current_area.Actions:
+            fightOptions()
+
+            if player.health > 0:
+                player.current_area.Actions.remove("fight")
     checkMap()
 
 def move_E():
