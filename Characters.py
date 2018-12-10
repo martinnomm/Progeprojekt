@@ -411,61 +411,61 @@ def checkMap():
     if player.current_area == not_visited_areas["Start"]:
         locationImage=PhotoImage(file="pictures/LocatedRoomStart.png")
         imgStart = PhotoImage(file="pictures/ExploredRoomStart.png")
-        screen.create_image(1, 0, anchot=NW, image=imgStart)
+        screen.create_image(2,2, anchot=NW, image=imgStart)
     elif player.current_area == not_visited_areas["Room1"]:
         locationImage=PhotoImage(file="pictures/LocatedRoom1.png")
         imgR1 = PhotoImage(file="pictures/ExploredRoom1.png")
-        screen.create_image(1, 0, anchor=NW, image=imgR1)
+        screen.create_image(2,2, anchor=NW, image=imgR1)
     elif player.current_area == not_visited_areas["Room1W"]:
         locationImage=PhotoImage(file="pictures/LocatedRoom1W.png")
         imgR1W = PhotoImage(file="pictures/ExploredRoom1W.png")
-        screen.create_image(1, 0, anchor=NW, image=imgR1W)
+        screen.create_image(2,2, anchor=NW, image=imgR1W)
     elif player.current_area == not_visited_areas["Room1E"]:
         locationImage=PhotoImage(file="pictures/LocatedRoom1E.png")
         imgR1E = PhotoImage(file="pictures/ExploredRoom1E.png")
-        screen.create_image(1, 0, anchor=NW, image=imgR1E)
+        screen.create_image(2,2, anchor=NW, image=imgR1E)
     elif player.current_area == not_visited_areas["Room2E"]:
         locationImage=PhotoImage(file="pictures/LocatedRoom2E.png")
         imgR2E = PhotoImage(file="pictures/ExploredRoom2E.png")
-        screen.create_image(1, 0, anchor=NW, image=imgR2E)
+        screen.create_image(2,2, anchor=NW, image=imgR2E)
     elif player.current_area == not_visited_areas["Room1N"]:
         locationImage=PhotoImage(file="pictures/LocatedRoom1N.png")
         imgR1N = PhotoImage(file="pictures/ExploredRoom1N.png")
-        screen.create_image(1, 0, anchor=NW, image=imgR1N)
+        screen.create_image(2,2, anchor=NW, image=imgR1N)
     elif player.current_area == not_visited_areas["Room2N"]:
         locationImage=PhotoImage(file="pictures/LocatedRoom2N.png")
         imgR2N = PhotoImage(file="pictures/ExploredRoom2N.png")
-        screen.create_image(1, 0, anchor=NW, image=imgR2N)
+        screen.create_image(2,2, anchor=NW, image=imgR2N)
     elif player.current_area == not_visited_areas["RoomBoss"]:
         locationImage=PhotoImage(file="pictures/LocatedRoomBoss.png")
         imgRBoss = PhotoImage(file="pictures/ExploredRoomBoss.png")
-        screen.create_image(1, 0, anchor=NW, image=imgRBoss)
-    screen.create_image(1, 0, anchor=NW, image=locationImage)
+        screen.create_image(2,2, anchor=NW, image=imgRBoss)
+    screen.create_image(2,2, anchor=NW, image=locationImage)
 
     if "Start" in visited_areas:
         imgStart = PhotoImage(file="pictures/ExploredRoomStart.png")
-        screen.create_image(1,0,anchot=NW, image=imgStart)
+        screen.create_image(2,2,anchot=NW, image=imgStart)
     if "Room1" in visited_areas:
         imgR1 = PhotoImage(file="pictures/ExploredRoom1.png")
-        screen.create_image(1,0,anchor=NW, image=imgR1)
+        screen.create_image(2,2,anchor=NW, image=imgR1)
     if "Room1W" in visited_areas:
         imgR1W = PhotoImage(file="pictures/ExploredRoom1W.png")
-        screen.create_image(1,0,anchor=NW, image=imgR1W)
+        screen.create_image(2,2,anchor=NW, image=imgR1W)
     if "Room1" in visited_areas:
         imgR1E = PhotoImage(file="pictures/ExploredRoom1E.png")
-        screen.create_image(1,0,anchor=NW, image=imgR1E)
+        screen.create_image(2,2,anchor=NW, image=imgR1E)
     if "Room2E" in visited_areas:
         imgR2E = PhotoImage(file="pictures/ExploredRoom2E.png")
-        screen.create_image(1,0,anchor=NW, image=imgR2E)
+        screen.create_image(2,2,anchor=NW, image=imgR2E)
     if "Room1N" in visited_areas:
         imgR1N = PhotoImage(file="pictures/ExploredRoom1N.png")
-        screen.create_image(1,0,anchor=NW, image=imgR1N)
+        screen.create_image(2,2,anchor=NW, image=imgR1N)
     if "Room2N" in visited_areas:
         imgR2N = PhotoImage(file="pictures/ExploredRoom2N.png")
-        screen.create_image(1,0,anchor=NW, image=imgR2N)
+        screen.create_image(2,2,anchor=NW, image=imgR2N)
     if "RoomBoss" in visited_areas:
         imgRBoss = PhotoImage(file="pictures/ExploredRoomBoss.png")
-        screen.create_image(1,0,anchor=NW, image=imgRBoss)
+        screen.create_image(2,2,anchor=NW, image=imgRBoss)
 
 
 
@@ -633,9 +633,9 @@ btnBottom.pack_forget()
 minimapBG = PhotoImage(file="pictures/Background.png")
 minimapImage = PhotoImage(file="pictures/ExploredRoomStart.png")
 locationImage = PhotoImage(file="pictures/LocatedRoomStart.png")
-screen.create_image(1,0,anchor=NW, image=minimapBG)
-screen.create_image(1,0,anchor=NW, image=minimapImage)
-screen.create_image(1,0,anchor=NW, image=locationImage)
+screen.create_image(2,2,anchor=NW, image=minimapBG)
+screen.create_image(2,2,anchor=NW, image=minimapImage)
+screen.create_image(2,2,anchor=NW, image=locationImage)
 
 rw.mainloop()
 
