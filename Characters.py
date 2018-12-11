@@ -57,10 +57,14 @@ class Player(Character):
     def spell_attack(self, target, hit_chance):
 
         if hit_chance >= target.evasion:
-            print("You cast a spell on the {0.name}".format(target))
-            print("Hit chance is {}.".format(hit_chance))
-            sleep(0.1)
-            print("Your spell hits the {0.name}".format(target))
+            textbox.delete(1.0, END)
+            textbox.insert(END, "You cast a spell on the {0.name}".format(target))
+            sleep(0.2)
+            textbox.delete(1.0, END)
+            textbox.insert(END, "Hit chance is {}.".format(hit_chance))
+            sleep(0.5)
+            textbox.delete(1.0, END)
+            textbox.insert(END, "Your spell hits the {0.name}".format(target))
             target.health -= randint(self.chosen_spell.damg[0], self.chosen_spell.damg[1])
                 #Siin viskab errori 'str' object has no attribute 'dmg'
             if 'burn' in self.chosen_spell.attribute:
@@ -127,7 +131,7 @@ class Goblin(Enemy):
         target.health -= D6()
 
 def melee():
-    player.attack(enemy, player_hit_chance)
+    player.attack(Goblin(), player_hit_chance)
 
 def spell():
 
@@ -145,12 +149,37 @@ def spell():
     btnHeal=Button(buttonFrame)
     btnHeal.pack(fill=X, padx=10)
     btnHeal.config(text="Heal", command=sHeal)
+def skip():
+    if D20() > 10:
+        textbox.delete(1.0, END)
+        textbox.insert(END, "You flee the fight")
+    else:
+        textbox.delete(1.0, END)
+        textbox.insert(END, "Failed to flee")
+
+
 #funktsioonid mis on spellide buttonitega seotud
+
 def sFireball():
     if player.mana >= 20:
         player.chosen_spell = Fireball()
-        player.spell_attack(enemy, player_hit_chance)
+        player_hit_chance = D20()
+        if player_hit_chance >= Goblin().evasion:
+            textbox.delete(1.0, END)
+            textbox.insert(END, "You cast a spell on the {0.name}".format(Goblin()))
+            sleep(0.2)
+            textbox.delete(1.0, END)
+            textbox.insert(END, "Hit chance is {}.".format(player_hit_chance))
+            sleep(0.5)
+            textbox.delete(1.0, END)
+            textbox.insert(END, "Your spell hits the {0.name}".format(Goblin()))
+            Goblin().health -= randint(player.chosen_spell.damg[0], player.chosen_spell.damg[1])
+            textbox.delete(1.0, END)
+            textbox.insert(END, "The health of the {0.name} is now {0.health}.".format(Goblin()))
         player.mana -= Fireball().mana_cost
+
+
+
     else:
         textbox.delete(1.0, END)
         textbox.insert(END, "You do not have enough mana")
@@ -158,8 +187,21 @@ def sFireball():
 def sIceshard():
     if player.mana >= 20:
         player.chosen_spell = Iceshard()
-        player.spell_attack(enemy, player_hit_chance)
+        player_hit_chance = D20()
+        if player_hit_chance >= Goblin().evasion:
+            textbox.delete(1.0, END)
+            textbox.insert(END, "You cast a spell on the {0.name}".format(Goblin()))
+            sleep(0.2)
+            textbox.delete(1.0, END)
+            textbox.insert(END, "Hit chance is {}.".format(player_hit_chance))
+            sleep(0.5)
+            textbox.delete(1.0, END)
+            textbox.insert(END, "Your spell hits the {0.name}".format(Goblin()))
+            Goblin().health -= randint(player.chosen_spell.damg[0], player.chosen_spell.damg[1])
+            textbox.delete(1.0, END)
+            textbox.insert(END, "The health of the {0.name} is now {0.health}.".format(Goblin()))
         player.mana -= Iceshard().mana_cost
+
     else:
         textbox.delete(1.0, END)
         textbox.insert(END, "You do not have enough mana")
@@ -167,8 +209,22 @@ def sIceshard():
 def sThunderbolt():
     if player.mana >= 20:
         player.chosen_spell = Thunderbolt()
-        player.spell_attack(enemy, player_hit_chance)
+        player_hit_chance = D20()
+        if player_hit_chance >= Goblin().evasion:
+            textbox.delete(1.0, END)
+            textbox.insert(END, "You cast a spell on the {0.name}".format(Goblin()))
+            sleep(0.2)
+            textbox.delete(1.0, END)
+            textbox.insert(END, "Hit chance is {}.".format(player_hit_chance))
+            sleep(0.5)
+            textbox.delete(1.0, END)
+            textbox.insert(END, "Your spell hits the {0.name}".format(Goblin()))
+            Goblin().health -= 2
+            textbox.delete(1.0, END)
+            textbox.insert(END, Goblin().health)
         player.mana -= Thunderbolt().mana_cost
+
+
     else:
         textbox.delete(1.0, END)
         textbox.insert(END, "You do not have enough mana")
@@ -185,106 +241,59 @@ def sHeal():
 
 #siit tuleb enamus asju ümber teha/ ära kustutada
 def battle(player,enemy):
-    print("An enemy {0.name} appears with a defense of {0.evasion}".format(enemy))
+    fightOptions()
     #Combat loop
-    while player.health > 0 and enemy.health > 0:
-        player_hit_chance = D20()
-        textbox.delete(1.0, END)
-        textbox.insert(END, "Do you want to attack, use a spell or do nothing?")
-        if action.lower() == "attack":
-            action_2 = input("Do you want to use a spell or melee attack? (spell, melee)")
-            if action_2.lower() == 'melee':
-                player.attack(enemy, player_hit_chance)
+    # while player.health > 0 and enemy.health > 0:
+    #     player_hit_chance = D20()
+    #     textbox.delete(1.0, END)
+    #     textbox.insert(END, "Do you want to attack, use a spell or do nothing?")
+    #
 
-            if action_2.lower() == 'spell':
-                w_spell = input("Which spell would you like to use? (Fireball, Thunderbolt, Iceshard")
+        # if enemy.health <= 0:
+        #     break
+        # enemy_hit_chance = D20()
+        # if "stunned" in enemy.status_effects:
+        #     print("The {0.name} is stunned.".format(enemy))
+        #     enemy.status_effects.remove("stunned")
+        # elif 'frozen' in enemy.status_effects:
+        #     print("The {0.name} is frozen".format(enemy))
+        # elif 'paralyzed' in enemy.status_effects:
+        #     print("The {0.name} is paralyzed".format(enemy))
+        # else:
+        #     if enemy_hit_chance >= player.evasion:
+        #         print("The {0.name} attacks you".format(enemy))
+        #         enemy.attack(player)
+        #     else:
+        #         print("The {0.name} misses their attack.".format(enemy))
+        # if "poisoned" in enemy.status_effects:
+        #     print("The {0.name} takes damage from poison".format(enemy))
+        #     enemy.health -= D4()
+        #     enemy.status_effects.remove("poisoned")
+        # if "bleeding" in enemy.status_effects:
+        #     print("The {0.name} takes damage from bleeding".format(enemy))
+        #     enemy.health -= D4()
+        #     enemy.status_effects.remove("bleeding")
+        #     print(enemy.health)
+        # if 'burned' in enemy.status_effects:
+        #     print("The {0.name} takes damage from burn".format(enemy))
+        #     enemy.health -= D4()
+        #     enemy.status_effects.remove('burned')
+        # if player.health <= 0:
+        #     break
+        # else:
+        #     print("Your health is now {0.health}.".format(player))
+        # sleep(0.1)
 
-                if player.mana >= 20:
-                    if w_spell == 'Fireball':
-                        player.chosen_spell = Fireball()
-                        player.spell_attack(enemy, player_hit_chance)
-                        player.mana -= Fireball().mana_cost
-                    elif w_spell == 'Thunderbolt':
-                        player.chosen_spell = Thunderbolt()
-                        player.spell_attack(enemy, player_hit_chance)
-                        player.mana -= Thunderbolt().mana_cost
-                    elif w_spell == 'Iceshard':
-                        player.chosen_spell = Iceshard()
-                        player.spell_attack(enemy, player_hit_chance)
-                        player.mana -= Iceshard().mana_cost
-
-                else:
-                    print("You do not have enough mana!")
-        elif action.lower() == 'heal':
-            action2 = input("Heal or heal status?")
-            if player.mana >= 25:
-                if action2.lower() == 'heal':
-                    player.mana -= Heal().mana_cost
-                    player.health += Heal().heal
-                    if player.health > 12:
-                        player.health = 12
-                elif action2.lower() == 'heal status':
-                    player.status.clear()
-                    print("All status effects have been removed.")
-            else:
-                print("You do not have enough mana")
-        elif action.lower() == "flee":
-            if D20() > 10:
-                print("You flee the fight")
-                break
-            else:
-                print("Failed to flee")
-        elif action == "":
-            print("You do nothing")
-        else:
-            print("Not understood, doing nothing")
-
-        print("The health of the {0.name} is now {0.health}.".format(enemy))
-        if enemy.health <= 0:
-            break
-        enemy_hit_chance = D20()
-        if "stunned" in enemy.status_effects:
-            print("The {0.name} is stunned.".format(enemy))
-            enemy.status_effects.remove("stunned")
-        elif 'frozen' in enemy.status_effects:
-            print("The {0.name} is frozen".format(enemy))
-        elif 'paralyzed' in enemy.status_effects:
-            print("The {0.name} is paralyzed".format(enemy))
-        else:
-            if enemy_hit_chance >= player.evasion:
-                print("The {0.name} attacks you".format(enemy))
-                enemy.attack(player)
-            else:
-                print("The {0.name} misses their attack.".format(enemy))
-        if "poisoned" in enemy.status_effects:
-            print("The {0.name} takes damage from poison".format(enemy))
-            enemy.health -= D4()
-            enemy.status_effects.remove("poisoned")
-        if "bleeding" in enemy.status_effects:
-            print("The {0.name} takes damage from bleeding".format(enemy))
-            enemy.health -= D4()
-            enemy.status_effects.remove("bleeding")
-            print(enemy.health)
-        if 'burned' in enemy.status_effects:
-            print("The {0.name} takes damage from burn".format(enemy))
-            enemy.health -= D4()
-            enemy.status_effects.remove('burned')
-        if player.health <= 0:
-            break
-        else:
-            print("Your health is now {0.health}.".format(player))
-        sleep(0.1)
-
-    #Display outcome
-    if enemy.health <= 0:
-        player.xp += 14
-        player.mana = 100
-        xp_needed = 100 - player.xp
-
-        print("You killed the {0.name}.".format(enemy))
-        print('You gained 14 xp,',xp_needed,'xp needed to gain a level')
-    elif player.health <= 0:
-        print("The {0.name} killed you.".format(enemy))
+    # #Display outcome
+    # if enemy.health <= 0:
+    #     player.xp += 14
+    #     player.mana = 100
+    #     xp_needed = 100 - player.xp
+    #
+    #     print("You killed the {0.name}.".format(enemy))
+    #     print('You gained 14 xp,',xp_needed,'xp needed to gain a level')
+    # elif player.health <= 0:
+    #     print("The {0.name} killed you.".format(enemy))
 
 ############## Dungeon Area ###################
 
@@ -462,7 +471,7 @@ def fightOptions():
     btnSpell.config(text="Spell", command=spell)
     btnSkip=Button(navigationFrame)
     btnSkip.pack(fill=X, padx=10)
-    btnSkip.config(text="Skip turn", command=weapon_scythe)
+    btnSkip.config(text="Skip turn", command=skip)
 #Checkmap command, mis ala kohta paneb õige minimapi display
 def checkMap():
     global locationImage
@@ -552,7 +561,7 @@ def move_N():
                     textbox.delete(1.0, END)
                     textbox.insert(END, "There seems to be an angry looking green midget up ahead.")
                 if "fight" in player.current_area.Actions:
-                    fightOptions()
+
                     fight()
                     if player.health > 0:
                         player.current_area.Actions.remove("fight")
@@ -564,8 +573,8 @@ def move_N():
                 textbox.delete(1.0, END)
                 textbox.insert(END, "There seems to be an angry looking green midget up ahead.")
             if "fight" in player.current_area.Actions:
-                fightOptions()
 
+                fight()
                 if player.health > 0:
                     player.current_area.Actions.remove("fight")
         checkMap()
