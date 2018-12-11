@@ -131,21 +131,59 @@ def melee():
 
 def spell():
 
-
     textbox.delete(1.0, END)
     textbox.insert(END, "Which spell would you like to use?")
-    btnFireball=Button(navigationFrame)
+    btnFireball=Button(buttonFrame)
     btnFireball.pack(fill=X, padx=10)
-    btnFireball.config(text="Fireball", command=Fireball)
-    btnIceshard=Button(navigationFrame)
+    btnFireball.config(text="Fireball", command=sFireball)
+    btnIceshard=Button(buttonFrame)
     btnIceshard.pack(fill=X, padx=10)
-    btnIceshard.config(text="Iceshard", command=Iceshard)
-    btnThunderbolt=Button(navigationFrame)
+    btnIceshard.config(text="Iceshard", command=sIceshard)
+    btnThunderbolt=Button(buttonFrame)
     btnThunderbolt.pack(fill=X, padx=10)
-    btnThunderbolt.config(text="Thunderbolt", command=Thunderbolt)
-    btnHeal=Button(navigationFrame)
+    btnThunderbolt.config(text="Thunderbolt", command=sThunderbolt)
+    btnHeal=Button(buttonFrame)
     btnHeal.pack(fill=X, padx=10)
-    btnHeal.config(text="Heal", command=Heal)
+    btnHeal.config(text="Heal", command=sHeal)
+#funktsioonid mis on spellide buttonitega seotud
+def sFireball():
+    if player.mana >= 20:
+        player.chosen_spell = Fireball()
+        player.spell_attack(enemy, player_hit_chance)
+        player.mana -= Fireball().mana_cost
+    else:
+        textbox.delete(1.0, END)
+        textbox.insert(END, "You do not have enough mana")
+
+def sIceshard():
+    if player.mana >= 20:
+        player.chosen_spell = Iceshard()
+        player.spell_attack(enemy, player_hit_chance)
+        player.mana -= Iceshard().mana_cost
+    else:
+        textbox.delete(1.0, END)
+        textbox.insert(END, "You do not have enough mana")
+
+def sThunderbolt():
+    if player.mana >= 20:
+        player.chosen_spell = Thunderbolt()
+        player.spell_attack(enemy, player_hit_chance)
+        player.mana -= Thunderbolt().mana_cost
+    else:
+        textbox.delete(1.0, END)
+        textbox.insert(END, "You do not have enough mana")
+
+def sHeal():
+    if player.mana >= 25:
+        player.mana -= Heal().mana_cost
+        player.health += Heal().heal
+        if player.health > 12:
+            player.health = 12
+    else:
+        textbox.delete(1.0, END)
+        textbox.insert(END, "You do not have enough mana")
+
+#siit tuleb enamus asju ümber teha/ ära kustutada
 def battle(player,enemy):
     print("An enemy {0.name} appears with a defense of {0.evasion}".format(enemy))
     #Combat loop
