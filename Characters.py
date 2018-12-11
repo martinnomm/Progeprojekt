@@ -493,16 +493,31 @@ def checkMap():
 
 
 def move_N():
-    #siin peaks fight algama aga ei kutsu esile
+    if player.current_area.Directions["n"] is None:
+        textbox.delete(1.0, END)
+        textbox.insert(END, "The Northern wall has no path")
+    else:
 
-    if "weapon" in player.current_area.Actions:
-        weapons()
-    if player.current_area == not_visited_areas["Room1"]:
-        if player.chosen_weapon is None:
-            #T=Text(rw, height=2, width=30)
-            textbox.delete(1.0, END)
-            textbox.insert(END, "This way seems dangerous. You need a weapon to be safe.")
-            #T.pack()
+        if "weapon" in player.current_area.Actions:
+            weapons()
+        if player.current_area == not_visited_areas["Room1"]:
+            if player.chosen_weapon is None:
+                #T=Text(rw, height=2, width=30)
+                textbox.delete(1.0, END)
+                textbox.insert(END, "This way seems dangerous. You need a weapon to be safe.")
+                #T.pack()
+            else:
+                player.current_area = not_visited_areas[player.current_area.Directions["n"]]
+                textbox.delete(1.0, END)
+                textbox.insert(END, "You decided to move north")
+                if player.current_area == not_visited_areas["Room1N"]:
+                    textbox.delete(1.0, END)
+                    textbox.insert(END, "There seems to be an angry looking green midget up ahead.")
+                if "fight" in player.current_area.Actions:
+                    fightOptions()
+                    fight()
+                    if player.health > 0:
+                        player.current_area.Actions.remove("fight")
         else:
             player.current_area = not_visited_areas[player.current_area.Directions["n"]]
             textbox.delete(1.0, END)
@@ -512,69 +527,69 @@ def move_N():
                 textbox.insert(END, "There seems to be an angry looking green midget up ahead.")
             if "fight" in player.current_area.Actions:
                 fightOptions()
-                fight()
+
                 if player.health > 0:
                     player.current_area.Actions.remove("fight")
-    else:
-        player.current_area = not_visited_areas[player.current_area.Directions["n"]]
-        textbox.delete(1.0, END)
-        textbox.insert(END, "You decided to move north")
-        if player.current_area == not_visited_areas["Room1N"]:
-            textbox.delete(1.0, END)
-            textbox.insert(END, "There seems to be an angry looking green midget up ahead.")
-        if "fight" in player.current_area.Actions:
-            fightOptions()
-
-            if player.health > 0:
-                player.current_area.Actions.remove("fight")
-    checkMap()
+        checkMap()
 
 def move_E():
-    if "weapon" in player.current_area.Actions:
-        hideWeapons()
-    if player.current_area == not_visited_areas["Room1"]:
-        if player.chosen_weapon is None:
-            #T = Text(rw, height=2, width=30)
-            textbox.delete(1.0, END)
-            textbox.insert(END, "This way seems dangerous. You need a weapon to be safe.")
-            #T.pack()
+    if player.current_area.Directions["e"] is None:
+        textbox.delete(1.0, END)
+        textbox.insert(END, "The Eastern wall has no path")
+    else:
+        if "weapon" in player.current_area.Actions:
+            hideWeapons()
+        if player.current_area == not_visited_areas["Room1"]:
+            if player.chosen_weapon is None:
+                #T = Text(rw, height=2, width=30)
+                textbox.delete(1.0, END)
+                textbox.insert(END, "This way seems dangerous. You need a weapon to be safe.")
+                #T.pack()
+            else:
+                player.current_area = not_visited_areas[player.current_area.Directions["e"]]
+                textbox.delete(1.0, END)
+                textbox.insert(END, "You decided to move east")
         else:
             player.current_area = not_visited_areas[player.current_area.Directions["e"]]
             textbox.delete(1.0, END)
             textbox.insert(END, "You decided to move east")
-    else:
-        player.current_area = not_visited_areas[player.current_area.Directions["e"]]
-        textbox.delete(1.0, END)
-        textbox.insert(END, "You decided to move east")
-    checkMap()
+        checkMap()
 
 def move_S():
-    if "weapon" in player.current_area.Actions:
-        weapons()
+    if player.current_area.Directions["s"] is None:
+        textbox.delete(1.0, END)
+        textbox.insert(END, "The Southern wall has no path")
+    else:
+        if "weapon" in player.current_area.Actions:
+            weapons()
 
-    if player.current_area == not_visited_areas["Room1"]:
-        if "key" not in player.Inventory:
-            #T = Text(rw, height=2, width=30)
-            textbox.delete(1.0, END)
-            textbox.insert(END, "The door seems to have locked behind you. The key might be further ahead.")
-            #T.pack()
+        if player.current_area == not_visited_areas["Room1"]:
+            if "key" not in player.Inventory:
+                #T = Text(rw, height=2, width=30)
+                textbox.delete(1.0, END)
+                textbox.insert(END, "The door seems to have locked behind you. The key might be further ahead.")
+                #T.pack()
+            else:
+                player.current_area = not_visited_areas[player.current_area.Directions["s"]]
+                textbox.delete(1.0, END)
+                textbox.insert(END, "You decided to move south")
         else:
             player.current_area = not_visited_areas[player.current_area.Directions["s"]]
             textbox.delete(1.0, END)
             textbox.insert(END, "You decided to move south")
-    else:
-        player.current_area = not_visited_areas[player.current_area.Directions["s"]]
-        textbox.delete(1.0, END)
-        textbox.insert(END, "You decided to move south")
-    checkMap()
+        checkMap()
 
 def move_W():
-    player.current_area = not_visited_areas[player.current_area.Directions["w"]]
-    textbox.delete(1.0, END)
-    textbox.insert(END, "You decided to move west")
-    if "weapon" in player.current_area.Actions:
-        weapons()
-    checkMap()
+    if player.current_area.Directions["w"] is None:
+        textbox.delete(1.0, END)
+        textbox.insert(END, "The Western wall has no path")
+    else:
+        player.current_area = not_visited_areas[player.current_area.Directions["w"]]
+        textbox.delete(1.0, END)
+        textbox.insert(END, "You decided to move west")
+        if "weapon" in player.current_area.Actions:
+            weapons()
+        checkMap()
 
 #WASD movementi jaoks event commandid, suunavad tavalistele movement commandidele
 def go_N(event):
@@ -601,16 +616,32 @@ def weapon_scythe():
     textbox.delete(1.0, END)
     textbox.insert(END, "You chose the scythe, a weapon covered with poisonous aura.")
 
+def doResize(event):
+    global screen
+    screenwidth = screen.winfo_reqwidth()
+    screenheight = screen.winfo_reqheight()
+    wscale = float(event.width) / screenwidth
+    hscale = float(event.height) / screenheight
+    screenwidth = event.width
+    screenheight = event.height
+    # resize the canvas
+    #screen.config(width=screenwidth, height=screenheight)
+    # rescale all the objects tagged with the "all" tag
+    screen.scale("all", 0, 0, wscale, hscale)
+
+
 
 rw = Tk()
 
+rw.geometry("750x650")
+rw.resizable(False,False)
 #Tegin 2 suuremat frame, top ja bottom display ja alumise osa jaoks
-displayFrame=Frame(rw)
-displayFrame.grid(rowspan=2)
+displayFrame=Frame(rw,width=750,height=500)
+displayFrame.pack(fill=BOTH,expand=YES,side=TOP)
 
 
 bottomFrame=Frame(rw)
-bottomFrame.grid()
+bottomFrame.pack(fill=BOTH)
 
 #3 frame, mis paigutatud bottom frame sisse(NESW nupud, Buttonite area, Textboxi area)
 navigationFrame=Frame(bottomFrame)
@@ -622,8 +653,8 @@ buttonFrame.grid(column=1,row=0)
 textFrame=Frame(bottomFrame)
 textFrame.grid(column=2,row=0,sticky=E)
 
-screen=Canvas(displayFrame,bg="lime")
-screen.pack()
+screen=Canvas(displayFrame,bg="lime",height=500,width=750)
+screen.pack(fill=X, expand=YES,side=TOP)
 
 btnN=Button(navigationFrame, text="N")
 btnN.grid(column=1,row=0)
@@ -648,9 +679,9 @@ rw.bind("d",go_E)
 rw.bind("s",go_S)
 
 #Tegin ühe textboxi, mille teksti saab korduvalt muuta(Check weapons or movement restricions for example)
-textbox=Text(textFrame,height=4,width=25)
+textbox=Text(textFrame,height=4,width=30, wrap=WORD)
 textbox.insert(END,"This is a box of text")
-textbox.pack()
+textbox.pack(side=RIGHT)
 
 #Tegin alguses valmis kolme nupu variabled, mida muuta (3 weaponi jaoks hetkel, aga saab kasutada muu jaoks veel)
 btnTop=Button(buttonFrame, text="First Button")
@@ -672,7 +703,26 @@ locationImage = PhotoImage(file="pictures/LocatedRoomStart.png")
 screen.create_image(2,2,anchor=NW, image=minimapBG)
 screen.create_image(2,2,anchor=NW, image=minimapImage)
 screen.create_image(2,2,anchor=NW, image=locationImage)
+print(screen.winfo_screenwidth())
+print(screen.winfo_screenheight())
+screen.addtag_all("all")
 
+
+
+def resizze(event):
+    global screen
+    global rw
+    from math import ceil
+    width = rw.winfo_width()
+    height = rw.winfo_height()
+    rw.update_idletasks()
+    newwidth = ceil(width*30/382)
+    newheight = ceil(height*4/347)
+    textbox.config(height=newheight,width=newwidth)
+    #print(str(width) + ' '+  str(height) + "||" + str(newwidth) + ' ' + str(newheight))
+
+rw.bind("<Configure>", resizze)
+#resizze(screen)
 rw.mainloop()
 
 
