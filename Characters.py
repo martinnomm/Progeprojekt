@@ -116,11 +116,12 @@ class Enemy(Character):
 
 
 class Goblin(Enemy):
-    def __init__(self, name="goblin", strength=D6(), evasion=8, health=11, status_effects=[], weakness='fire'):
+    def __init__(self, name="goblin", strength=D6(), evasion=8, health=20, status_effects=[], weakness='fire'):
         super().__init__(name, strength, evasion, health, status_effects, weakness)
 
     def attack(self, target):
         target.health -= D6()
+
 
 
 def melee():
@@ -147,6 +148,24 @@ def enemycheck():
         return False
 
 def Game_END():
+    if enemycheck():
+        btn1Nav.pack_forget()
+        btn2Nav.pack_forget()
+        btn3Nav.pack_forget()
+    else:
+        newenemy.attack(player)
+    if player.health <= 0:
+        btn1Nav.pack_forget()
+        btn2Nav.pack_forget()
+        btn3Nav.pack_forget()
+        textbox.delete(1.0, END)
+        textbox.insert(END, 'The {} has slain you and your body will remain in the Dungeon forever.'.format(newenemy.name))
+    if 'bleeding' in newenemy.status_effects:
+        newenemy.health -= randint(1,6)
+        newenemy.status_effects.remove('bleeding')
+    if 'poisoned' in newenemy.status_effects:
+        newenemy.health -= randint(1,4)
+        newenemy.status_effects.remove('poisoned')
     if enemycheck():
         btn1Nav.pack_forget()
         btn2Nav.pack_forget()
@@ -503,7 +522,15 @@ def fightOptions():
 
 def enemyattack():
     if 'stunned' not in newenemy.status_effects:
-        enemy.attack()
+        enemy_hit_chance = D20()
+        textbox.delete(1.0, END)
+        if enemy_hit_chance >= player.evasion:
+            textbox.insert(END, "The {0.name} attacks you and hits".format(newenemy))
+            enemy.attack(player)
+        else:
+            textbox.insert(END, "The {0.name} tries to hit you but misses their attack.".format(newenemy))
+
+
 # Checkmap command, mis ala kohta paneb õige minimapi display
 
 
