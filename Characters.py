@@ -6,7 +6,7 @@ from Spells import *
 from tkinter import *
 
 
-#Sets the base Character class with only health
+# Sets the base Character class with only health
 
 
 class Character:
@@ -14,10 +14,7 @@ class Character:
     def __init__(self,health):
         self.health = health
 
-
-visited_areas =[]
-
-#Sets the Player class based on Character, designating the correct health. Also defines the attack
+# Sets the Player class based on Character, designating the correct health. Also defines the attack
 
 
 class Player(Character):
@@ -32,83 +29,78 @@ class Player(Character):
         self.mana = 100
         self.xp = 0
         self.chosen_spell = None
+        self.spell_string = None
         self.status = []
     evasion = 12
     strength = D8()
 
-
     def attack(self, target, hit_chance):
-        #print("To attack press ENTER, type to not attack")
-        #answer = input("")
-        #if answer == "":
+        textbox.delete(1.0, END)
         if hit_chance >= target.evasion:
-            print("You swing at the {0.name}".format(target))
-            print("Hit chance is {}.".format(hit_chance))
-            sleep(0.1)
-            print("Your attack hits the {0.name}".format(target))
+            textbox.insert(END, 'You swing at the {} and hit.'.format(target.name))
             target.health -= randint(self.chosen_weapon.damage_roll[0], self.chosen_weapon.damage_roll[1])
             if "bleed" in self.chosen_weapon.attributes:
-                target.status_effects.append("bleeding")
+                if D20() > 8:
+                    target.status_effects.append("bleeding")
             if "stun" in self.chosen_weapon.attributes:
-                target.status_effects.append("stunned")
+                if D20() > 8:
+                    target.status_effects.append("stunned")
             if "poison" in self.chosen_weapon.attributes:
-                target.status_effects.append("poisoned")
+                if D20() > 9:
+                    target.status_effects.append("poisoned")
+        else:
+            textbox.insert(END, 'You swing at the {} but miss your attack.'.format(target.name))
 
     def spell_attack(self, target, hit_chance):
-
         if hit_chance >= target.evasion:
             textbox.delete(1.0, END)
-            textbox.insert(END, "You cast a spell on the {0.name}".format(target))
-            sleep(0.2)
-            textbox.delete(1.0, END)
-            textbox.insert(END, "Hit chance is {}.".format(hit_chance))
-            sleep(0.5)
-            textbox.delete(1.0, END)
-            textbox.insert(END, "Your spell hits the {0.name}".format(target))
-            target.health -= randint(self.chosen_spell.damg[0], self.chosen_spell.damg[1])
-                #Siin viskab errori 'str' object has no attribute 'dmg'
+            attackboost = 1
             if 'burn' in self.chosen_spell.attribute:
-                target.status_effects.append('burned')
+                if 'fire' in target.weakness:
+                    attackboost = 2
 
             if 'paralyze' in self.chosen_spell.attribute:
-                target.status_effects.append('paralyzed')
+                if 'lightning' in target.weakness:
+                    attackboost = 2
 
             if 'freeze' in self.chosen_spell.attribute:
-                target.status_effects.append('frozen')
-
+                if 'ice' in target.weakness:
+                    attackboost = 2
+            if attackboost == 2:
+                tegevus = textbox.insert(END, 'You cast {1} and it hits the {0.name}. The {0.name} is weak to {1}'.format(target, player.spell_string))
+            else:
+                tegevus = textbox.insert(END,'You cast {1} and it hits the {0.name}.'.format(target, player.spell_string))
+            rw.after(200, tegevus)
+            target.health -= randint(self.chosen_spell.damg[0], self.chosen_spell.damg[1])*attackboost
 
         else:
-            print("You miss your attack")
-
-        #else:
-        #    print("You don't do a thing")
-        #sleep(0.1)
-
-#
-#
-#Template weapons as a test
+            textbox.delete(1.0, END)
+            tegevus = textbox.insert(END, 'You miss your attack.')
+            rw.after(200, tegevus)
 
 
 class Weapon:
-    def __init__(self,damage_roll,attributes):
+    def __init__(self, damage_roll, attributes):
         self.damage_roll = damage_roll
         self.attributes = attributes
 
 
 class Stiletto(Weapon):
-    def __init__(self, damage_roll=[1,6],attributes=["bleed"]):
-        super().__init__(damage_roll,attributes)
+    def __init__(self, damage_roll=[1, 6], attributes=["bleed"]):
+        super().__init__(damage_roll, attributes)
+
 
 class Mace(Weapon):
-    def __init__(self,damage_roll=[1,6],attributes=["stun"]):
-        super().__init__(damage_roll,attributes)
+    def __init__(self,damage_roll=[1, 6], attributes=["stun"]):
+        super().__init__(damage_roll, attributes)
+
 
 class Scythe(Weapon):
-    def __init__(self,damage_roll=[1,8],attributes=["poison"]):
-        super().__init__(damage_roll,attributes)
+    def __init__(self,damage_roll=[1, 8], attributes=["poison"]):
+        super().__init__(damage_roll, attributes)
     
 
-#Sets the Enemy class based on Character, designating name, strenth(dam),defense,health. Also defines the attack
+# Sets the Enemy class based on Character, designating name, strenth(dam),defense,health. Also defines the attack
 
 class Enemy(Character):
     def __init__(self, name, strength, evasion, health, status_effects, weakness):
@@ -119,193 +111,221 @@ class Enemy(Character):
         self.evasion = evasion
         self.weakness = weakness
 
-    def attack(self,target):
+    def attack(self, target):
         target.health -= self.strength
 
 
 class Goblin(Enemy):
-    def __init__(self, name="goblin", strength=D6(), evasion=8, health=11, status_effects =[], weakness = 'fire'):
+    def __init__(self, name="goblin", strength=D6(), evasion=8, health=11, status_effects=[], weakness='fire'):
         super().__init__(name, strength, evasion, health, status_effects, weakness)
 
     def attack(self, target):
         target.health -= D6()
 
+
 def melee():
-    player.attack(Goblin(), player_hit_chance)
+    player_hit_chance = D20()
+    player.attack(newenemy, player_hit_chance)
+    Game_END()
+
+
+
+def unbinded(event):
+    textbox.delete(1.0, END)
+    textbox.insert(END, '''Can't run, you're locked in here!''')
+
+def statuscheck():
+    print('enemy: ' + str(newenemy.health))
+    print('player: ' + str(player.health))
+
+def enemycheck():
+    if newenemy.health <= 0:
+        textbox.delete(1.0, END)
+        textbox.insert(END, 'You have slain the {}. And thus are able to escape the Dungeon.'.format(newenemy.name))
+        return True
+    else:
+        return False
+
+def Game_END():
+    if enemycheck():
+        btn1Nav.pack_forget()
+        btn2Nav.pack_forget()
+        btn3Nav.pack_forget()
 
 def spell():
-
     textbox.delete(1.0, END)
     textbox.insert(END, "Which spell would you like to use?")
-    btnFireball=Button(buttonFrame)
-    btnFireball.pack(fill=X, padx=10)
-    btnFireball.config(text="Fireball", command=sFireball)
-    btnIceshard=Button(buttonFrame)
-    btnIceshard.pack(fill=X, padx=10)
-    btnIceshard.config(text="Iceshard", command=sIceshard)
-    btnThunderbolt=Button(buttonFrame)
-    btnThunderbolt.pack(fill=X, padx=10)
-    btnThunderbolt.config(text="Thunderbolt", command=sThunderbolt)
-    btnHeal=Button(buttonFrame)
-    btnHeal.pack(fill=X, padx=10)
-    btnHeal.config(text="Heal", command=sHeal)
-def skip():
-    if D20() > 10:
-        textbox.delete(1.0, END)
-        textbox.insert(END, "You flee the fight")
-    else:
-        textbox.delete(1.0, END)
-        textbox.insert(END, "Failed to flee")
+    btn1Nav.config(text='Fireball', command=spell_use_fireball)
+    btn2Nav.config(text='Iceshard', command=spell_use_iceshard)
+    btn3Nav.config(text='Thunderbolt', command=spell_use_thunderbolt)
+    btnTop.pack(fill=X, padx=10)
+    btnTop.config(text='Heal', command=spell_use_heal)
+    btnMiddle.pack(fill=X, padx=10)
+    btnMiddle.config(text='Back', command=spell_back)
 
 
-#funktsioonid mis on spellide buttonitega seotud
+def spell_use_fireball():
+    player_hit_chance = D20()
+    player.chosen_spell = Fireball()
+    player.spell_string = 'Fireball'
+    player.spell_attack(newenemy, player_hit_chance)
+    player.mana -= Fireball().mana_cost
+    spell_back()
+    Game_END()
 
-def sFireball():
-    if player.mana >= 20:
-        player.chosen_spell = Fireball()
-        player_hit_chance = D20()
-        if player_hit_chance >= Goblin().evasion:
-            textbox.delete(1.0, END)
-            textbox.insert(END, "You cast a spell on the {0.name}".format(Goblin()))
-            sleep(0.2)
-            textbox.delete(1.0, END)
-            textbox.insert(END, "Hit chance is {}.".format(player_hit_chance))
-            sleep(0.5)
-            textbox.delete(1.0, END)
-            textbox.insert(END, "Your spell hits the {0.name}".format(Goblin()))
-            Goblin().health -= randint(player.chosen_spell.damg[0], player.chosen_spell.damg[1])
-            textbox.delete(1.0, END)
-            textbox.insert(END, "The health of the {0.name} is now {0.health}.".format(Goblin()))
-        player.mana -= Fireball().mana_cost
+def spell_use_iceshard():
+    player_hit_chance = D20()
+    player.chosen_spell = Iceshard()
+    player.spell_string = 'Iceshard'
+    player.spell_attack(newenemy, player_hit_chance)
+    player.mana -= Iceshard().mana_cost
+    spell_back()
+    Game_END()
 
 
-
-    else:
-        textbox.delete(1.0, END)
-        textbox.insert(END, "You do not have enough mana")
-
-def sIceshard():
-    if player.mana >= 20:
-        player.chosen_spell = Iceshard()
-        player_hit_chance = D20()
-        if player_hit_chance >= Goblin().evasion:
-            textbox.delete(1.0, END)
-            textbox.insert(END, "You cast a spell on the {0.name}".format(Goblin()))
-            sleep(0.2)
-            textbox.delete(1.0, END)
-            textbox.insert(END, "Hit chance is {}.".format(player_hit_chance))
-            sleep(0.5)
-            textbox.delete(1.0, END)
-            textbox.insert(END, "Your spell hits the {0.name}".format(Goblin()))
-            Goblin().health -= randint(player.chosen_spell.damg[0], player.chosen_spell.damg[1])
-            textbox.delete(1.0, END)
-            textbox.insert(END, "The health of the {0.name} is now {0.health}.".format(Goblin()))
-        player.mana -= Iceshard().mana_cost
-
-    else:
-        textbox.delete(1.0, END)
-        textbox.insert(END, "You do not have enough mana")
-
-def sThunderbolt():
-    if player.mana >= 20:
-        player.chosen_spell = Thunderbolt()
-        player_hit_chance = D20()
-        if player_hit_chance >= Goblin().evasion:
-            textbox.delete(1.0, END)
-            textbox.insert(END, "You cast a spell on the {0.name}".format(Goblin()))
-            sleep(0.2)
-            textbox.delete(1.0, END)
-            textbox.insert(END, "Hit chance is {}.".format(player_hit_chance))
-            sleep(0.5)
-            textbox.delete(1.0, END)
-            textbox.insert(END, "Your spell hits the {0.name}".format(Goblin()))
-            Goblin().health -= 2
-            textbox.delete(1.0, END)
-            textbox.insert(END, Goblin().health)
-        player.mana -= Thunderbolt().mana_cost
+def spell_use_thunderbolt():
+    player_hit_chance = D20()
+    player.chosen_spell = Thunderbolt()
+    player.spell_string = 'Thunderbolt'
+    player.spell_attack(newenemy, player_hit_chance)
+    player.mana -= Thunderbolt().mana_cost
+    spell_back()
+    Game_END()
 
 
-    else:
-        textbox.delete(1.0, END)
-        textbox.insert(END, "You do not have enough mana")
+def spell_use_heal():
+    nowhealth = player.health
+    Heal()
+    newhealth = player.health
+    textbox.delete(1.0, END)
+    if nowhealth == newhealth:
+        textbox.insert(END, 'You were already at full health.')
+    elif newhealth > nowhealth:
+        healthchange = nowhealth - newhealth
+        textbox.insert(END, 'You healed yourself for {} health.'.format(healthchange))
+    spell_back()
+    Game_END()
 
-def sHeal():
-    if player.mana >= 25:
-        player.mana -= Heal().mana_cost
-        player.health += Heal().heal
-        if player.health > 12:
-            player.health = 12
-    else:
-        textbox.delete(1.0, END)
-        textbox.insert(END, "You do not have enough mana")
 
-#siit tuleb enamus asju ümber teha/ ära kustutada
-def battle(player,enemy):
+
+def spell_back():
+    btnTop.pack_forget()
+    btnMiddle.pack_forget()
     fightOptions()
-    #Combat loop
-    # while player.health > 0 and enemy.health > 0:
-    #     player_hit_chance = D20()
-    #     textbox.delete(1.0, END)
-    #     textbox.insert(END, "Do you want to attack, use a spell or do nothing?")
-    #
 
-        # if enemy.health <= 0:
-        #     break
-        # enemy_hit_chance = D20()
-        # if "stunned" in enemy.status_effects:
-        #     print("The {0.name} is stunned.".format(enemy))
-        #     enemy.status_effects.remove("stunned")
-        # elif 'frozen' in enemy.status_effects:
-        #     print("The {0.name} is frozen".format(enemy))
-        # elif 'paralyzed' in enemy.status_effects:
-        #     print("The {0.name} is paralyzed".format(enemy))
-        # else:
-        #     if enemy_hit_chance >= player.evasion:
-        #         print("The {0.name} attacks you".format(enemy))
-        #         enemy.attack(player)
-        #     else:
-        #         print("The {0.name} misses their attack.".format(enemy))
-        # if "poisoned" in enemy.status_effects:
-        #     print("The {0.name} takes damage from poison".format(enemy))
-        #     enemy.health -= D4()
-        #     enemy.status_effects.remove("poisoned")
-        # if "bleeding" in enemy.status_effects:
-        #     print("The {0.name} takes damage from bleeding".format(enemy))
-        #     enemy.health -= D4()
-        #     enemy.status_effects.remove("bleeding")
-        #     print(enemy.health)
-        # if 'burned' in enemy.status_effects:
-        #     print("The {0.name} takes damage from burn".format(enemy))
-        #     enemy.health -= D4()
-        #     enemy.status_effects.remove('burned')
-        # if player.health <= 0:
-        #     break
-        # else:
-        #     print("Your health is now {0.health}.".format(player))
-        # sleep(0.1)
+def battle(player,enemy):
+    print("An enemy {0.name} appears with a defense of {0.evasion}".format(enemy))
+    # Combat loop
+    while player.health > 0 and enemy.health > 0:
+        player_hit_chance = D20()
+        textbox.delete(1.0, END)
+        textbox.insert(END, "Do you want to attack, use a spell or do nothing?")
+        if action.lower() == "attack":
+            action_2 = input("Do you want to use a spell or melee attack? (spell, melee)")
+            if action_2.lower() == 'melee':
+                player.attack(enemy, player_hit_chance)
 
-    # #Display outcome
-    # if enemy.health <= 0:
-    #     player.xp += 14
-    #     player.mana = 100
-    #     xp_needed = 100 - player.xp
-    #
-    #     print("You killed the {0.name}.".format(enemy))
-    #     print('You gained 14 xp,',xp_needed,'xp needed to gain a level')
-    # elif player.health <= 0:
-    #     print("The {0.name} killed you.".format(enemy))
+            if action_2.lower() == 'spell':
+                w_spell = input("Which spell would you like to use? (Fireball, Thunderbolt, Iceshard")
 
-############## Dungeon Area ###################
+                if player.mana >= 20:
+                    if w_spell == 'Fireball':
+                        player.chosen_spell = Fireball()
+                        player.spell_attack(enemy, player_hit_chance)
+                        player.mana -= Fireball().mana_cost
+                    elif w_spell == 'Thunderbolt':
+                        player.chosen_spell = Thunderbolt()
+                        player.spell_attack(enemy, player_hit_chance)
+                        player.mana -= Thunderbolt().mana_cost
+                    elif w_spell == 'Iceshard':
+                        player.chosen_spell = Iceshard()
+                        player.spell_attack(enemy, player_hit_chance)
+                        player.mana -= Iceshard().mana_cost
 
+                else:
+                    print("You do not have enough mana!")
+        elif action.lower() == 'heal':
+            action2 = input("Heal or heal status?")
+            if player.mana >= 25:
+                if action2.lower() == 'heal':
+                    player.mana -= Heal().mana_cost
+                    player.health += Heal().heal
+                    if player.health > 12:
+                        player.health = 12
+                elif action2.lower() == 'heal status':
+                    player.status.clear()
+                    print("All status effects have been removed.")
+            else:
+                print("You do not have enough mana")
+        elif action.lower() == "flee":
+            if D20() > 10:
+                print("You flee the fight")
+                break
+            else:
+                print("Failed to flee")
+        elif action == "":
+            print("You do nothing")
+        else:
+            print("Not understood, doing nothing")
+
+        print("The health of the {0.name} is now {0.health}.".format(enemy))
+        if enemy.health <= 0:
+            break
+        enemy_hit_chance = D20()
+        if "stunned" in enemy.status_effects:
+            print("The {0.name} is stunned.".format(enemy))
+            enemy.status_effects.remove("stunned")
+        elif 'frozen' in enemy.status_effects:
+            print("The {0.name} is frozen".format(enemy))
+        elif 'paralyzed' in enemy.status_effects:
+            print("The {0.name} is paralyzed".format(enemy))
+        else:
+            if enemy_hit_chance >= player.evasion:
+                print("The {0.name} attacks you".format(enemy))
+                enemy.attack(player)
+            else:
+                print("The {0.name} misses their attack.".format(enemy))
+        if "poisoned" in enemy.status_effects:
+            print("The {0.name} takes damage from poison".format(enemy))
+            enemy.health -= D4()
+            enemy.status_effects.remove("poisoned")
+        if "bleeding" in enemy.status_effects:
+            print("The {0.name} takes damage from bleeding".format(enemy))
+            enemy.health -= D4()
+            enemy.status_effects.remove("bleeding")
+            print(enemy.health)
+        if 'burned' in enemy.status_effects:
+            print("The {0.name} takes damage from burn".format(enemy))
+            enemy.health -= D4()
+            enemy.status_effects.remove('burned')
+        if player.health <= 0:
+            break
+        else:
+            print("Your health is now {0.health}.".format(player))
+        sleep(0.1)
+
+    # Display outcome
+    if enemy.health <= 0:
+        player.xp += 14
+        player.mana = 100
+        xp_needed = 100 - player.xp
+
+        print("You killed the {0.name}.".format(enemy))
+        print('You gained 14 xp,', xp_needed, 'xp needed to gain a level')
+    elif player.health <= 0:
+        print("The {0.name} killed you.".format(enemy))
+
+# ############# Dungeon Area ################## #
 
 
 class Area:
     def __init__(self, Directions, Actions):
         self.Directions = Directions
         self.Actions = Actions
+
     def show_actions(self):
         mingid_suunad = []
-        for i in ["n","e","s","w"]:
+        for i in ["n", "e", "s", "w"]:
             if self.Directions[i] is not None:
                 mingid_suunad.append(i)
         for suund in mingid_suunad:
@@ -327,7 +347,7 @@ class Area:
         while vastus.lower() not in choices:
             print("Not understood")
             vastus = input()
-        if  vastus.lower() == "n":
+        if vastus.lower() == "n":
             if player.current_area == not_visited_areas["Room1"]:
                 if player.chosen_weapon is None:
                     print("This way seems dangerous. You need a weapon to be safe.")
@@ -335,7 +355,7 @@ class Area:
                     player.current_area = not_visited_areas[player.current_area.Directions["n"]]
             else:
                 player.current_area = not_visited_areas[player.current_area.Directions["n"]]
-        if  vastus.lower() == "e":
+        if vastus.lower() == "e":
             if player.current_area == not_visited_areas["Room1"]:
                 if player.chosen_weapon is None:
                     print("This way seems dangerous. You need a weapon to be safe.")
@@ -343,7 +363,7 @@ class Area:
                     player.current_area = not_visited_areas[player.current_area.Directions["e"]]
             else:
                 player.current_area = not_visited_areas[player.current_area.Directions["e"]]
-        if  vastus.lower() == "s":
+        if vastus.lower() == "s":
             if player.current_area == not_visited_areas["Room1"]:
                 if "key" not in player.Inventory:
                     print("The door seems to have locked behind you. The key might be further ahead.")
@@ -352,7 +372,7 @@ class Area:
                     player.current_area = not_visited_areas[player.current_area.Directions["s"]]
             else:
                 player.current_area = not_visited_areas[player.current_area.Directions["s"]]
-        if  vastus.lower() == "w":
+        if vastus.lower() == "w":
             player.current_area = not_visited_areas[player.current_area.Directions["w"]]
         if "Ayylmao" in player.current_area.Actions:
             print("Ayylmao")
@@ -366,45 +386,44 @@ class Area:
             if "key" not in player.Inventory:
                 player.Inventory.append("key")
 
+
 class Start_Area(Area):
-    def __init__(self, Directions={"n": "Room1","e": None,"s": None,"w": None}, Actions=["Game_Over_Leave"]):
+    def __init__(self, Directions={"n": "Room1", "e": None, "s": None, "w": None}, Actions=["Game_Over_Leave"]):
         super().__init__(Directions, Actions)
 
 
-
-
 class Room1_Area(Area):
-    def __init__(self,Directions={"n":"Room1N","e":"Room1E","s":"Start","w":"Room1W"},Actions=[None]):
-        super().__init__(Directions,Actions)
+    def __init__(self,Directions={"n":"Room1N", "e":"Room1E", "s":"Start", "w":"Room1W"}, Actions=[None]):
+        super().__init__(Directions, Actions)
 
 
 class Room1W_Area(Area):
-    def __init__(self, Directions = {"n":None, "e":"Room1", "s":None, "w":None}, Actions = ["weapon"]):
-        super().__init__(Directions,Actions)
+    def __init__(self, Directions={"n":None, "e":"Room1", "s":None, "w":None}, Actions=["weapon"]):
+        super().__init__(Directions, Actions)
 
 
 class Room1E_Area(Area):
-    def __init__(self, Directions = {"n":"Room2E", "e":None, "s":None, "w":"Room1"}, Actions=[None]):
-        super().__init__(Directions,Actions)
+    def __init__(self, Directions={"n":"Room2E", "e":None, "s":None, "w":"Room1"}, Actions=[None]):
+        super().__init__(Directions, Actions)
 
 class Room2E_Area(Area):
-    def __init__(self, Directions = {"n":None, "e":None, "s":"Room1E", "w":None}, Actions=[None]):
-        super().__init__(Directions,Actions)
+    def __init__(self, Directions={"n":None, "e":None, "s":"Room1E", "w":None}, Actions=[None]):
+        super().__init__(Directions, Actions)
 
 
 class Room1N_Area(Area):
-    def __init__(self, Directions = {"n":"Room2N", "e":None, "s":"Room1", "w":None}, Actions = ["Ayylmao"]):
-        super().__init__(Directions,Actions)
+    def __init__(self, Directions={"n":"Room2N", "e":None, "s":"Room1", "w":None}, Actions=[None]):
+        super().__init__(Directions, Actions)
 
 
 class Room2N_Area(Area):
-    def __init__(self, Directions = {"n":"RoomBoss", "e":None, "s":"Room1N", "w":None}, Actions = [None]):
-        super().__init__(Directions,Actions)
+    def __init__(self, Directions={"n":"RoomBoss", "e":None, "s":"Room1N", "w":None}, Actions=[None]):
+        super().__init__(Directions, Actions)
 
 
 class RoomBoss_Area(Area):
-    def __init__(self, Directions = {"n":None, "e":None, "s":"Room2N", "w":None}, Actions = ["Get_Key","fight"]):
-        super().__init__(Directions,Actions)
+    def __init__(self, Directions={"n":None, "e":None, "s":"Room2N", "w":None}, Actions=["Get_Key","fight"]):
+        super().__init__(Directions, Actions)
 
 
 ###############################################################
@@ -416,14 +435,14 @@ not_visited_areas = {"Start": Start_Area(), "Room1": Room1_Area(), "Room1W": Roo
 
 playerlist = [Player()]
 player = playerlist[0]
+enemylist = [Goblin()]
+newenemy = enemylist[0]
 
 
 def fight():
-    battle(player, Goblin())
+    battle(player, newenemy)
 
-
-#enemies = [Enemy("Goblin", D4(), 8, 11)]
-
+# enemies = [Enemy("Goblin", D4(), 8, 11)]
 
 
 def choose_weapon():
@@ -441,102 +460,116 @@ def choose_weapon():
         new_answer = Scythe()
     player.chosen_weapon = new_answer
 
-#Sisenedes Room1W näitab weapon buttonid ja paneb nende commandid
-def weapons():
-    btnTop.pack(fill=X,padx=10)
-    btnTop.config(text="Mace",command=weapon_mace)
-    btnMiddle.pack(fill=X,padx=10)
-    btnMiddle.config(text="Stiletto",command=weapon_stiletto)
-    btnBottom.pack(fill=X,padx=10)
-    btnBottom.config(text="Scythe",command=weapon_scythe)
+# Sisenedes Room1W näitab weapon buttonid ja paneb nende commandid
 
-#Command, mis Room1W lahkudes peidab weapon nupud
+
+def weapons():
+    btnTop.pack(fill=X, padx=10)
+    btnTop.config(text="Mace", command=weapon_mace)
+    btnMiddle.pack(fill=X, padx=10)
+    btnMiddle.config(text="Stiletto", command=weapon_stiletto)
+    btnBottom.pack(fill=X, padx=10)
+    btnBottom.config(text="Scythe", command=weapon_scythe)
+
+# Command, mis Room1W lahkudes peidab weapon nupud
+
+
 def hideWeapons():
     btnTop.pack_forget()
     btnMiddle.pack_forget()
     btnBottom.pack_forget()
 
+
 def fightOptions():
-    textbox.delete(1.0, END)
-    textbox.insert(END, "You challenge the goblin to a fight")
+    global btnN, btnW, btnS, btnE
+    if 'fight' in player.current_area.Actions:
+        textbox.delete(1.0, END)
+        textbox.insert(END, "You challenge the goblin to a fight")
+        player.current_area.Actions.remove('fight')
     btnN.grid_forget()
     btnW.grid_forget()
     btnE.grid_forget()
     btnS.grid_forget()
-    btnAttack=Button(navigationFrame)
-    btnAttack.pack(fill=X, padx=10)
-    btnAttack.config(text="Melee", command=melee)
-    btnSpell=Button(navigationFrame)
-    btnSpell.pack(fill=X, padx=10)
-    btnSpell.config(text="Spell", command=spell)
-    btnSkip=Button(navigationFrame)
-    btnSkip.pack(fill=X, padx=10)
-    btnSkip.config(text="Skip turn", command=skip)
-#Checkmap command, mis ala kohta paneb õige minimapi display
+    rw.bind('<w>', unbinded)
+    rw.bind('<s>', unbinded)
+    rw.bind('<a>', unbinded)
+    rw.bind('<d>', unbinded)
+    btn1Nav.pack(fill=X, padx=10)
+    btn1Nav.config(text="Melee", command=melee)
+    btn2Nav.pack(fill=X, padx=10)
+    btn2Nav.config(text="Spell", command=spell)
+    btn3Nav.pack(fill=X, padx=10)
+    btn3Nav.config(text="Status", command=statuscheck)
+
+def enemyattack():
+    if 'stunned' not in newenemy.status_effects:
+        enemy.attack()
+# Checkmap command, mis ala kohta paneb õige minimapi display
+
+
 def checkMap():
     global locationImage
     global imgR1N, imgR1, imgStart, imgR1E, imgR1W, imgR2E, imgR2N, imgRBoss
     if player.current_area not in visited_areas:
         visited_areas.append(player.current_area)
     if player.current_area == not_visited_areas["Start"]:
-        locationImage=PhotoImage(file="pictures/LocatedRoomStart.png")
+        locationImage = PhotoImage(file="pictures/LocatedRoomStart.png")
         imgStart = PhotoImage(file="pictures/ExploredRoomStart.png")
-        screen.create_image(2,2, anchot=NW, image=imgStart)
+        screen.create_image(2, 2, anchot=NW, image=imgStart)
     elif player.current_area == not_visited_areas["Room1"]:
-        locationImage=PhotoImage(file="pictures/LocatedRoom1.png")
+        locationImage = PhotoImage(file="pictures/LocatedRoom1.png")
         imgR1 = PhotoImage(file="pictures/ExploredRoom1.png")
-        screen.create_image(2,2, anchor=NW, image=imgR1)
+        screen.create_image(2, 2, anchor=NW, image=imgR1)
     elif player.current_area == not_visited_areas["Room1W"]:
-        locationImage=PhotoImage(file="pictures/LocatedRoom1W.png")
+        locationImage = PhotoImage(file="pictures/LocatedRoom1W.png")
         imgR1W = PhotoImage(file="pictures/ExploredRoom1W.png")
-        screen.create_image(2,2, anchor=NW, image=imgR1W)
+        screen.create_image(2, 2, anchor=NW, image=imgR1W)
     elif player.current_area == not_visited_areas["Room1E"]:
-        locationImage=PhotoImage(file="pictures/LocatedRoom1E.png")
+        locationImage = PhotoImage(file="pictures/LocatedRoom1E.png")
         imgR1E = PhotoImage(file="pictures/ExploredRoom1E.png")
-        screen.create_image(2,2, anchor=NW, image=imgR1E)
+        screen.create_image(2, 2, anchor=NW, image=imgR1E)
     elif player.current_area == not_visited_areas["Room2E"]:
-        locationImage=PhotoImage(file="pictures/LocatedRoom2E.png")
+        locationImage = PhotoImage(file="pictures/LocatedRoom2E.png")
         imgR2E = PhotoImage(file="pictures/ExploredRoom2E.png")
-        screen.create_image(2,2, anchor=NW, image=imgR2E)
+        screen.create_image(2, 2, anchor=NW, image=imgR2E)
     elif player.current_area == not_visited_areas["Room1N"]:
-        locationImage=PhotoImage(file="pictures/LocatedRoom1N.png")
+        locationImage = PhotoImage(file="pictures/LocatedRoom1N.png")
         imgR1N = PhotoImage(file="pictures/ExploredRoom1N.png")
-        screen.create_image(2,2, anchor=NW, image=imgR1N)
+        screen.create_image(2, 2, anchor=NW, image=imgR1N)
     elif player.current_area == not_visited_areas["Room2N"]:
-        locationImage=PhotoImage(file="pictures/LocatedRoom2N.png")
+        locationImage = PhotoImage(file="pictures/LocatedRoom2N.png")
         imgR2N = PhotoImage(file="pictures/ExploredRoom2N.png")
-        screen.create_image(2,2, anchor=NW, image=imgR2N)
+        screen.create_image(2, 2, anchor=NW, image=imgR2N)
     elif player.current_area == not_visited_areas["RoomBoss"]:
-        locationImage=PhotoImage(file="pictures/LocatedRoomBoss.png")
+        locationImage = PhotoImage(file="pictures/LocatedRoomBoss.png")
         imgRBoss = PhotoImage(file="pictures/ExploredRoomBoss.png")
-        screen.create_image(2,2, anchor=NW, image=imgRBoss)
-    screen.create_image(2,2, anchor=NW, image=locationImage)
+        screen.create_image(2, 2, anchor=NW, image=imgRBoss)
+    screen.create_image(2, 2, anchor=NW, image=locationImage)
 
     if "Start" in visited_areas:
         imgStart = PhotoImage(file="pictures/ExploredRoomStart.png")
-        screen.create_image(2,2,anchot=NW, image=imgStart)
+        screen.create_image(2, 2, anchot=NW, image=imgStart)
     if "Room1" in visited_areas:
         imgR1 = PhotoImage(file="pictures/ExploredRoom1.png")
-        screen.create_image(2,2,anchor=NW, image=imgR1)
+        screen.create_image(2, 2, anchor=NW, image=imgR1)
     if "Room1W" in visited_areas:
         imgR1W = PhotoImage(file="pictures/ExploredRoom1W.png")
-        screen.create_image(2,2,anchor=NW, image=imgR1W)
+        screen.create_image(2, 2, anchor=NW, image=imgR1W)
     if "Room1" in visited_areas:
         imgR1E = PhotoImage(file="pictures/ExploredRoom1E.png")
-        screen.create_image(2,2,anchor=NW, image=imgR1E)
+        screen.create_image(2, 2, anchor=NW, image=imgR1E)
     if "Room2E" in visited_areas:
         imgR2E = PhotoImage(file="pictures/ExploredRoom2E.png")
-        screen.create_image(2,2,anchor=NW, image=imgR2E)
+        screen.create_image(2, 2, anchor=NW, image=imgR2E)
     if "Room1N" in visited_areas:
         imgR1N = PhotoImage(file="pictures/ExploredRoom1N.png")
-        screen.create_image(2,2,anchor=NW, image=imgR1N)
+        screen.create_image(2, 2, anchor=NW, image=imgR1N)
     if "Room2N" in visited_areas:
         imgR2N = PhotoImage(file="pictures/ExploredRoom2N.png")
-        screen.create_image(2,2,anchor=NW, image=imgR2N)
+        screen.create_image(2, 2, anchor=NW, image=imgR2N)
     if "RoomBoss" in visited_areas:
         imgRBoss = PhotoImage(file="pictures/ExploredRoomBoss.png")
-        screen.create_image(2,2,anchor=NW, image=imgRBoss)
-
+        screen.create_image(2, 2, anchor=NW, image=imgRBoss)
 
 
 def move_N():
@@ -549,19 +582,20 @@ def move_N():
             weapons()
         if player.current_area == not_visited_areas["Room1"]:
             if player.chosen_weapon is None:
-                #T=Text(rw, height=2, width=30)
                 textbox.delete(1.0, END)
                 textbox.insert(END, "This way seems dangerous. You need a weapon to be safe.")
-                #T.pack()
             else:
                 player.current_area = not_visited_areas[player.current_area.Directions["n"]]
                 textbox.delete(1.0, END)
                 textbox.insert(END, "You decided to move north")
                 if player.current_area == not_visited_areas["Room1N"]:
                     textbox.delete(1.0, END)
-                    textbox.insert(END, "There seems to be an angry looking green midget up ahead.")
+                    textbox.insert(END, "You notice light from a fire in the distance.")
+                if player.current_area == not_visited_areas["Room2N"]:
+                    textbox.delete(1.0, END)
+                    textbox.insert(END, 'There seems to be an angry looking green midget up ahead.')
                 if "fight" in player.current_area.Actions:
-
+                    fightOptions()
                     fight()
                     if player.health > 0:
                         player.current_area.Actions.remove("fight")
@@ -571,13 +605,18 @@ def move_N():
             textbox.insert(END, "You decided to move north")
             if player.current_area == not_visited_areas["Room1N"]:
                 textbox.delete(1.0, END)
-                textbox.insert(END, "There seems to be an angry looking green midget up ahead.")
+                textbox.insert(END, "You notice light from a fire in the distance.")
+            if player.current_area == not_visited_areas["Room2N"]:
+                textbox.delete(1.0, END)
+                textbox.insert(END, 'There seems to be an angry looking green midget up ahead.')
             if "fight" in player.current_area.Actions:
+                fightOptions()
 
-                fight()
-                if player.health > 0:
-                    player.current_area.Actions.remove("fight")
+                if player.health >= 0:
+                    #Game_End()
+                    pass
         checkMap()
+
 
 def move_E():
     if player.current_area.Directions["e"] is None:
@@ -588,10 +627,8 @@ def move_E():
             hideWeapons()
         if player.current_area == not_visited_areas["Room1"]:
             if player.chosen_weapon is None:
-                #T = Text(rw, height=2, width=30)
                 textbox.delete(1.0, END)
                 textbox.insert(END, "This way seems dangerous. You need a weapon to be safe.")
-                #T.pack()
             else:
                 player.current_area = not_visited_areas[player.current_area.Directions["e"]]
                 textbox.delete(1.0, END)
@@ -601,6 +638,7 @@ def move_E():
             textbox.delete(1.0, END)
             textbox.insert(END, "You decided to move east")
         checkMap()
+
 
 def move_S():
     if player.current_area.Directions["s"] is None:
@@ -612,10 +650,8 @@ def move_S():
 
         if player.current_area == not_visited_areas["Room1"]:
             if "key" not in player.Inventory:
-                #T = Text(rw, height=2, width=30)
                 textbox.delete(1.0, END)
                 textbox.insert(END, "The door seems to have locked behind you. The key might be further ahead.")
-                #T.pack()
             else:
                 player.current_area = not_visited_areas[player.current_area.Directions["s"]]
                 textbox.delete(1.0, END)
@@ -625,6 +661,7 @@ def move_S():
             textbox.delete(1.0, END)
             textbox.insert(END, "You decided to move south")
         checkMap()
+
 
 def move_W():
     if player.current_area.Directions["w"] is None:
@@ -638,140 +675,118 @@ def move_W():
             weapons()
         checkMap()
 
-#WASD movementi jaoks event commandid, suunavad tavalistele movement commandidele
+# WASD movementi jaoks event commandid, suunavad tavalistele movement commandidele
+
+
 def go_N(event):
     move_N()
+
+
 def go_W(event):
     move_W()
+
+
 def go_S(event):
     move_S()
+
+
 def go_E(event):
     move_E()
+
 
 def weapon_mace():
     player.chosen_weapon = Mace()
     textbox.delete(1.0, END)
     textbox.insert(END, "You chose the mace, a weapon capable of stunning enmies.")
 
+
 def weapon_stiletto():
     player.chosen_weapon = Stiletto()
     textbox.delete(1.0, END)
     textbox.insert(END, "You chose the stiletto, a weapon for bleeding DOT damage.")
+
 
 def weapon_scythe():
     player.chosen_weapon = Scythe()
     textbox.delete(1.0, END)
     textbox.insert(END, "You chose the scythe, a weapon covered with poisonous aura.")
 
-def doResize(event):
-    global screen
-    screenwidth = screen.winfo_reqwidth()
-    screenheight = screen.winfo_reqheight()
-    wscale = float(event.width) / screenwidth
-    hscale = float(event.height) / screenheight
-    screenwidth = event.width
-    screenheight = event.height
-    # resize the canvas
-    #screen.config(width=screenwidth, height=screenheight)
-    # rescale all the objects tagged with the "all" tag
-    screen.scale("all", 0, 0, wscale, hscale)
-
-
 
 rw = Tk()
 
-rw.geometry("750x650")
-rw.resizable(False,False)
-#Tegin 2 suuremat frame, top ja bottom display ja alumise osa jaoks
-displayFrame=Frame(rw,width=750,height=500)
-displayFrame.pack(fill=BOTH,expand=YES,side=TOP)
+#rw.geometry("750x650")
+rw.resizable(False, False)
+# Tegin 2 suuremat frame, top ja bottom display ja alumise osa jaoks
+displayFrame = Frame(rw, width=750, height=500)
+displayFrame.pack(fill=BOTH, expand=YES, side=TOP)
 
 
-bottomFrame=Frame(rw)
+bottomFrame = Frame(rw)
 bottomFrame.pack(fill=BOTH)
 
-#3 frame, mis paigutatud bottom frame sisse(NESW nupud, Buttonite area, Textboxi area)
-navigationFrame=Frame(bottomFrame)
-navigationFrame.grid(column=0,row=0,sticky=W)
+# 3 frame, mis paigutatud bottom frame sisse(NESW nupud, Buttonite area, Textboxi area)
+navigationFrame = Frame(bottomFrame)
+navigationFrame.grid(column=0, row=0, sticky=W)
 
-buttonFrame=Frame(bottomFrame)
-buttonFrame.grid(column=1,row=0)
+buttonFrame = Frame(bottomFrame)
+buttonFrame.grid(column=1, row=0)
 
-textFrame=Frame(bottomFrame)
-textFrame.grid(column=2,row=0,sticky=E)
+textFrame = Frame(bottomFrame)
+textFrame.grid(column=2, row=0, sticky=E)
 
-screen=Canvas(displayFrame,bg="lime",height=500,width=750)
-screen.pack(fill=X, expand=YES,side=TOP)
+screen = Canvas(displayFrame, bg="lime", height=500, width=750)
+screen.pack(fill=X, expand=YES, side=TOP)
 
-btnN=Button(navigationFrame, text="N")
-btnN.grid(column=1,row=0)
+btn1Nav = Button(navigationFrame)
+btn2Nav = Button(navigationFrame)
+btn3Nav = Button(navigationFrame)
+
+btnN = Button(navigationFrame, text="N")
+btnN.grid(column=1, row=0)
 btnN.config(command=move_N)
 
 btnE = Button(navigationFrame, text="E")
-btnE.grid(column=2,row=1)
+btnE.grid(column=2, row=1)
 btnE.config(command=move_E)
 
-btnS=Button(navigationFrame, text="S")
-btnS.grid(column=1,row=2)
+btnS = Button(navigationFrame, text="S")
+btnS.grid(column=1, row=2)
 btnS.config(command=move_S)
 
-btnW=Button(navigationFrame, text="W")
-btnW.grid(column=0,row=1)
+btnW = Button(navigationFrame, text="W")
+btnW.grid(column=0, row=1)
 btnW.config(command=move_W)
 
-#Bindisin WASD keyboardilt map movementi jaoks
-rw.bind("w",go_N)
-rw.bind("a",go_W)
-rw.bind("d",go_E)
-rw.bind("s",go_S)
+# Bindisin WASD keyboardilt map movementi jaoks
+rw.bind("w", go_N)
+rw.bind("a", go_W)
+rw.bind("d", go_E)
+rw.bind("s", go_S)
 
-#Tegin ühe textboxi, mille teksti saab korduvalt muuta(Check weapons or movement restricions for example)
-textbox=Text(textFrame,height=4,width=30, wrap=WORD)
-textbox.insert(END,"This is a box of text")
+# Tegin ühe textboxi, mille teksti saab korduvalt muuta(Check weapons or movement restricions for example)
+textbox = Text(textFrame, height=4, width=30, wrap=WORD)
+textbox.insert(END, "This is a box of text")
 textbox.pack(side=RIGHT)
 
-#Tegin alguses valmis kolme nupu variabled, mida muuta (3 weaponi jaoks hetkel, aga saab kasutada muu jaoks veel)
-btnTop=Button(buttonFrame, text="First Button")
-btnTop.pack(fill=X,padx=10)
+# Tegin alguses valmis kolme nupu variabled, mida muuta (3 weaponi jaoks hetkel, aga saab kasutada muu jaoks veel)
+btnTop = Button(buttonFrame, text="First Button")
+btnTop.pack(fill=X, padx=10)
 btnTop.pack_forget()
 
-btnMiddle=Button(buttonFrame, text="Second Button")
-btnMiddle.pack(fill=X,padx=10)
+btnMiddle = Button(buttonFrame, text="Second Button")
+btnMiddle.pack(fill=X, padx=10)
 btnMiddle.pack_forget()
 
-btnBottom=Button(buttonFrame, text="Third Button")
-btnBottom.pack(fill=X,padx=10)
+btnBottom = Button(buttonFrame, text="Third Button")
+btnBottom.pack(fill=X, padx=10)
 btnBottom.pack_forget()
 
-#Impordin starting are image minimapi jaoks
+# Impordin starting are image minimapi jaoks
 minimapBG = PhotoImage(file="pictures/Background.png")
 minimapImage = PhotoImage(file="pictures/ExploredRoomStart.png")
 locationImage = PhotoImage(file="pictures/LocatedRoomStart.png")
-screen.create_image(2,2,anchor=NW, image=minimapBG)
-screen.create_image(2,2,anchor=NW, image=minimapImage)
-screen.create_image(2,2,anchor=NW, image=locationImage)
-print(screen.winfo_screenwidth())
-print(screen.winfo_screenheight())
-screen.addtag_all("all")
+screen.create_image(2, 2, anchor=NW, image=minimapBG)
+screen.create_image(2, 2, anchor=NW, image=minimapImage)
+screen.create_image(2, 2, anchor=NW, image=locationImage)
 
-
-
-def resizze(event):
-    global screen
-    global rw
-    from math import ceil
-    width = rw.winfo_width()
-    height = rw.winfo_height()
-    rw.update_idletasks()
-    newwidth = ceil(width*30/382)
-    newheight = ceil(height*4/347)
-    textbox.config(height=newheight,width=newwidth)
-    #print(str(width) + ' '+  str(height) + "||" + str(newwidth) + ' ' + str(newheight))
-
-rw.bind("<Configure>", resizze)
-#resizze(screen)
 rw.mainloop()
-
-
-
-
