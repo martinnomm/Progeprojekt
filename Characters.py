@@ -118,6 +118,7 @@ class Enemy(Character):
 class Goblin(Enemy):
     def __init__(self, name="goblin", strength=D6(), evasion=8, health=20, status_effects=[], weakness='fire'):
         super().__init__(name, strength, evasion, health, status_effects, weakness)
+        self.max_health = 20
 
     def attack(self, target):
         target.health -= D6()
@@ -125,9 +126,16 @@ class Goblin(Enemy):
 
 
 def melee():
+    global playerpic, screen,enemypic
+    playerpic = playerattack
+    enemypic = goblinidle
     player_hit_chance = D20()
     player.attack(newenemy, player_hit_chance)
-    Game_END()
+    btn1Nav.pack_forget()
+    btn2Nav.pack_forget()
+    btn3Nav.pack_forget()
+    rw.bind('<Button-1>',fightcheck)
+    #Game_END()
 
 
 
@@ -136,8 +144,20 @@ def unbinded(event):
     textbox.insert(END, '''Can't run, you're locked in here!''')
 
 def statuscheck():
-    print('enemy: ' + str(newenemy.health))
-    print('player: ' + str(player.health))
+    textbox.delete(1.0, END)
+    if newenemy.max_health == newenemy.health:
+        enemystatus = 'The {} is at maximum glory.'.format(newenemy.name)
+    elif newenemy.health / newenemy.max_health >= 0.75 and newenemy.health / newenemy.max_health < 1:
+        enemystatus = 'The {} is slightly wounded.'.format(newenemy.name)
+    elif newenemy.health / newenemy.max_health >= 0.5 and  newenemy.health / newenemy.max_health < 0.75:
+        enemystatus = 'The {} is wounded'.format(newenemy.name)
+    elif newenemy.health / newenemy.max_health >= 0.25 and newenemy.health / newenemy.max_health < 0.5:
+        enemystatus = 'The {} is severely wounded'.format(newenemy.name)
+    elif newenemy.health / newenemy.max_health > 0 and newenemy.health / newenemy.max_health < 0.25:
+        enemystatus = 'The {} is grievously wounded'.format(newenemy.name)
+    else:
+        print('wat')
+    textbox.insert(END, 'You are at {0.health} health. Your max is 12. \nThe {1.name} is weak to {1.weakness}. \n'.format(player, newenemy)+enemystatus)
 
 def enemycheck():
     if newenemy.health <= 0:
@@ -160,12 +180,7 @@ def Game_END():
         btn3Nav.pack_forget()
         textbox.delete(1.0, END)
         textbox.insert(END, 'The {} has slain you and your body will remain in the Dungeon forever.'.format(newenemy.name))
-    if 'bleeding' in newenemy.status_effects:
-        newenemy.health -= randint(1,6)
-        newenemy.status_effects.remove('bleeding')
-    if 'poisoned' in newenemy.status_effects:
-        newenemy.health -= randint(1,4)
-        newenemy.status_effects.remove('poisoned')
+
     if enemycheck():
         btn1Nav.pack_forget()
         btn2Nav.pack_forget()
@@ -190,7 +205,10 @@ def spell_use_fireball():
     player.spell_attack(newenemy, player_hit_chance)
     player.mana -= Fireball().mana_cost
     spell_back()
-    Game_END()
+    btn1Nav.pack_forget()
+    btn2Nav.pack_forget()
+    btn3Nav.pack_forget()
+    rw.bind('<Button-1>', fightcheck)
 
 def spell_use_iceshard():
     player_hit_chance = D20()
@@ -199,7 +217,10 @@ def spell_use_iceshard():
     player.spell_attack(newenemy, player_hit_chance)
     player.mana -= Iceshard().mana_cost
     spell_back()
-    Game_END()
+    btn1Nav.pack_forget()
+    btn2Nav.pack_forget()
+    btn3Nav.pack_forget()
+    rw.bind('<Button-1>', fightcheck)
 
 
 def spell_use_thunderbolt():
@@ -209,12 +230,15 @@ def spell_use_thunderbolt():
     player.spell_attack(newenemy, player_hit_chance)
     player.mana -= Thunderbolt().mana_cost
     spell_back()
-    Game_END()
-
+    btn1Nav.pack_forget()
+    btn2Nav.pack_forget()
+    btn3Nav.pack_forget()
+    rw.bind('<Button-1>', fightcheck)
 
 def spell_use_heal():
     nowhealth = player.health
-    Heal()
+    player.mana -= Heal().mana_cost
+    player.health += Heal().heal
     newhealth = player.health
     textbox.delete(1.0, END)
     if nowhealth == newhealth:
@@ -223,7 +247,10 @@ def spell_use_heal():
         healthchange = nowhealth - newhealth
         textbox.insert(END, 'You healed yourself for {} health.'.format(healthchange))
     spell_back()
-    Game_END()
+    btn1Nav.pack_forget()
+    btn2Nav.pack_forget()
+    btn3Nav.pack_forget()
+    rw.bind('<Button-1>', fightcheck)
 
 
 
@@ -409,40 +436,48 @@ class Area:
 class Start_Area(Area):
     def __init__(self, Directions={"n": "Room1", "e": None, "s": None, "w": None}, Actions=["Game_Over_Leave"]):
         super().__init__(Directions, Actions)
+        self.name='Start'
 
 
 class Room1_Area(Area):
     def __init__(self,Directions={"n":"Room1N", "e":"Room1E", "s":"Start", "w":"Room1W"}, Actions=[None]):
         super().__init__(Directions, Actions)
+        self.name='Room1'
 
 
 class Room1W_Area(Area):
     def __init__(self, Directions={"n":None, "e":"Room1", "s":None, "w":None}, Actions=["weapon"]):
         super().__init__(Directions, Actions)
+        self.name='Room1W'
 
 
 class Room1E_Area(Area):
     def __init__(self, Directions={"n":"Room2E", "e":None, "s":None, "w":"Room1"}, Actions=[None]):
         super().__init__(Directions, Actions)
+        self.name='Room1E'
 
 class Room2E_Area(Area):
     def __init__(self, Directions={"n":None, "e":None, "s":"Room1E", "w":None}, Actions=[None]):
         super().__init__(Directions, Actions)
+        self.name='Room2E'
 
 
 class Room1N_Area(Area):
     def __init__(self, Directions={"n":"Room2N", "e":None, "s":"Room1", "w":None}, Actions=[None]):
         super().__init__(Directions, Actions)
+        self.name='Room1N'
 
 
 class Room2N_Area(Area):
     def __init__(self, Directions={"n":"RoomBoss", "e":None, "s":"Room1N", "w":None}, Actions=[None]):
         super().__init__(Directions, Actions)
+        self.name='Room2N'
 
 
 class RoomBoss_Area(Area):
     def __init__(self, Directions={"n":None, "e":None, "s":"Room2N", "w":None}, Actions=["Get_Key","fight"]):
         super().__init__(Directions, Actions)
+        self.name='RoomBoss'
 
 
 ###############################################################
@@ -457,6 +492,7 @@ player = playerlist[0]
 enemylist = [Goblin()]
 newenemy = enemylist[0]
 
+thisishereasbandaid = False
 
 def fight():
     battle(player, newenemy)
@@ -500,7 +536,11 @@ def hideWeapons():
 
 
 def fightOptions():
-    global btnN, btnW, btnS, btnE
+    global btnN, btnW, btnS, btnE, enemypic, playerpic, checkstatus, screen
+    checkstatus = 1
+
+    screen.update_idletasks()
+    screen.update()
     if 'fight' in player.current_area.Actions:
         textbox.delete(1.0, END)
         textbox.insert(END, "You challenge the goblin to a fight")
@@ -519,16 +559,23 @@ def fightOptions():
     btn2Nav.config(text="Spell", command=spell)
     btn3Nav.pack(fill=X, padx=10)
     btn3Nav.config(text="Status", command=statuscheck)
+    #screen.create_image(500, 140, anchor=NW, image=enemypic)
+    #screen.create_image(100, 200, anchor=NW, image=playerpic)
 
 def enemyattack():
+    global playerpic, enemypic, screen
     if 'stunned' not in newenemy.status_effects:
+        enemypic = goblinattack
+        #screen.create_image(500, 140, anchor=NW, image=enemypic)
         enemy_hit_chance = D20()
         textbox.delete(1.0, END)
         if enemy_hit_chance >= player.evasion:
             textbox.insert(END, "The {0.name} attacks you and hits".format(newenemy))
-            enemy.attack(player)
+            newenemy.attack(player)
         else:
-            textbox.insert(END, "The {0.name} tries to hit you but misses their attack.".format(newenemy))
+            playerpic = playerdodge
+            #screen.create_image(100, 200, anchor=NW, image=playerpic)
+            textbox.insert(END, "The {0.name} tries to hit you but you dodge their attack.".format(newenemy))
 
 
 # Checkmap command, mis ala kohta paneb õige minimapi display
@@ -536,40 +583,64 @@ def enemyattack():
 
 def checkMap():
     global locationImage
-    global imgR1N, imgR1, imgStart, imgR1E, imgR1W, imgR2E, imgR2N, imgRBoss
+    global imgR1N, imgR1, imgStart, imgR1E, imgR1W, imgR2E, imgR2N, imgRBoss, Backgroundpic
     if player.current_area not in visited_areas:
-        visited_areas.append(player.current_area)
+        visited_areas.append(player.current_area.name)
     if player.current_area == not_visited_areas["Start"]:
         locationImage = PhotoImage(file="pictures/LocatedRoomStart.png")
         imgStart = PhotoImage(file="pictures/ExploredRoomStart.png")
+        Backgroundpic = PhotoImage(file='pictures/BGStart.png')
+        screen.create_image(2, 2, anchor=NW, image=minimapBG)
+        screen.create_image(377, 252, image=Backgroundpic)
         screen.create_image(2, 2, anchot=NW, image=imgStart)
     elif player.current_area == not_visited_areas["Room1"]:
         locationImage = PhotoImage(file="pictures/LocatedRoom1.png")
         imgR1 = PhotoImage(file="pictures/ExploredRoom1.png")
+        Backgroundpic = PhotoImage(file='pictures/BGRoom1.png')
+        screen.create_image(377, 252, image=Backgroundpic)
+        screen.create_image(2, 2, anchor=NW, image=minimapBG)
         screen.create_image(2, 2, anchor=NW, image=imgR1)
     elif player.current_area == not_visited_areas["Room1W"]:
         locationImage = PhotoImage(file="pictures/LocatedRoom1W.png")
         imgR1W = PhotoImage(file="pictures/ExploredRoom1W.png")
+        Backgroundpic = PhotoImage(file='pictures/BGRoom1W.png')
+        screen.create_image(377, 252, image=Backgroundpic)
+        screen.create_image(2, 2, anchor=NW, image=minimapBG)
         screen.create_image(2, 2, anchor=NW, image=imgR1W)
     elif player.current_area == not_visited_areas["Room1E"]:
         locationImage = PhotoImage(file="pictures/LocatedRoom1E.png")
         imgR1E = PhotoImage(file="pictures/ExploredRoom1E.png")
+        Backgroundpic = PhotoImage(file='pictures/BGRoom1E.png')
+        screen.create_image(377, 252, image=Backgroundpic)
+        screen.create_image(2, 2, anchor=NW, image=minimapBG)
         screen.create_image(2, 2, anchor=NW, image=imgR1E)
     elif player.current_area == not_visited_areas["Room2E"]:
         locationImage = PhotoImage(file="pictures/LocatedRoom2E.png")
         imgR2E = PhotoImage(file="pictures/ExploredRoom2E.png")
+        Backgroundpic = PhotoImage(file='pictures/BGRoom2E.png')
+        screen.create_image(377, 252, image=Backgroundpic)
+        screen.create_image(2, 2, anchor=NW, image=minimapBG)
         screen.create_image(2, 2, anchor=NW, image=imgR2E)
     elif player.current_area == not_visited_areas["Room1N"]:
         locationImage = PhotoImage(file="pictures/LocatedRoom1N.png")
         imgR1N = PhotoImage(file="pictures/ExploredRoom1N.png")
+        Backgroundpic = PhotoImage(file='pictures/BGRoom1N.png')
+        screen.create_image(377, 252, image=Backgroundpic)
+        screen.create_image(2, 2, anchor=NW, image=minimapBG)
         screen.create_image(2, 2, anchor=NW, image=imgR1N)
     elif player.current_area == not_visited_areas["Room2N"]:
         locationImage = PhotoImage(file="pictures/LocatedRoom2N.png")
         imgR2N = PhotoImage(file="pictures/ExploredRoom2N.png")
+        Backgroundpic = PhotoImage(file='pictures/BGRoom2N.png')
+        screen.create_image(377, 252, image=Backgroundpic)
+        screen.create_image(2, 2, anchor=NW, image=minimapBG)
         screen.create_image(2, 2, anchor=NW, image=imgR2N)
     elif player.current_area == not_visited_areas["RoomBoss"]:
         locationImage = PhotoImage(file="pictures/LocatedRoomBoss.png")
         imgRBoss = PhotoImage(file="pictures/ExploredRoomBoss.png")
+        Backgroundpic = PhotoImage(file='pictures/BGRoomBoss.png')
+        screen.create_image(377, 252, image=Backgroundpic)
+        screen.create_image(2, 2, anchor=NW, image=minimapBG)
         screen.create_image(2, 2, anchor=NW, image=imgRBoss)
     screen.create_image(2, 2, anchor=NW, image=locationImage)
 
@@ -622,8 +693,13 @@ def move_N():
                     textbox.delete(1.0, END)
                     textbox.insert(END, 'There seems to be an angry looking green midget up ahead.')
                 if "fight" in player.current_area.Actions:
+                    enemypic = PhotoImage(file='Pictures/GoblinIdle.png')
+                    playerpic = PhotoImage(file='Pictures/PlayerIdle.png')
+                    screen.create_image(500, 140, anchor=NW, image=enemypic)
+                    screen.create_image(100, 200, anchor=NW, image=playerpic)
                     fightOptions()
-                    fight()
+
+                    #fight()
                     if player.health > 0:
                         player.current_area.Actions.remove("fight")
         else:
@@ -637,12 +713,17 @@ def move_N():
                 textbox.delete(1.0, END)
                 textbox.insert(END, 'There seems to be an angry looking green midget up ahead.')
             if "fight" in player.current_area.Actions:
+                enemypic = PhotoImage(file='Pictures/GoblinIdle.png')
+                playerpic = PhotoImage(file='Pictures/PlayerIdle.png')
+                screen.create_image(500, 140, anchor=NW, image=enemypic)
+                screen.create_image(100, 200, anchor=NW, image=playerpic)
                 fightOptions()
 
                 if player.health >= 0:
                     #Game_End()
                     pass
         checkMap()
+
 
 
 def move_E():
@@ -739,48 +820,111 @@ def weapon_scythe():
     textbox.insert(END, "You chose the scythe, a weapon covered with poisonous aura.")
 
 
+def kill_buttons():
+    btnTop.pack_forget()
+    btnMiddle.pack_forget()
+    btnBottom.pack_forget()
+
+
+def fightcheck(event):
+    global checkstatus, statuspic, screen,enemypic,playerpic,thisishereasbandaid
+    btn1Nav.pack()
+    btn1Nav.config(text='Press left mouse button to cont.', command= passfunc)
+    if not thisishereasbandaid:
+        screen.create_image(500, 140, anchor=NW, image=enemypic)
+        screen.create_image(100, 200, anchor=NW, image=playerpic)
+        thisishereasbandaid = True
+    enemypic = goblinidle
+    playerpic=playeridle
+    if checkstatus == 1:
+        playerpic= playeridle
+        enemypic=goblinidle
+        if 'stunned' in newenemy.status_effects:
+            textbox.delete(1.0, END)
+            textbox.insert(END, 'The goblin is stunned.')
+            statuspic = PhotoImage(file='Pictures/StatusStunned.png')
+            screen.create_image(500, 100, image=statuspic)
+            checkstatus = 3
+        else:
+            checkstatus = 2
+    elif checkstatus == 2:
+        enemypic=goblinattack
+        enemyattack()
+
+        checkstatus = 3
+    elif checkstatus == 3:
+        playerpic = playeridle
+        enemypic = goblinidle
+        if 'poisoned' in newenemy.status_effects:
+            dam = randint(1, 4)
+            newenemy.health -= dam
+            newenemy.status_effects.remove('poisoned')
+            textbox.delete(1.0, END)
+            textbox.insert(END, 'The {0.name} takes damage from poison.'.format(newenemy))
+            statuspic = PhotoImage(file='Pictures/StatusPoisoned.png')
+            screen.create_image(500, 100, image=statuspic)
+        if 'bleeding' in newenemy.status_effects:
+            dam = randint(1, 6)
+            newenemy.health -= dam
+            newenemy.status_effects.remove('bleeding')
+            textbox.delete(1.0, END)
+            textbox.insert(END, 'The {0.name} takes damage from bleeding.'.format(newenemy))
+            statuspic = PhotoImage(file='Pictures/StatusBleeding.png')
+            screen.create_image(500, 100, image=statuspic)
+        checkstatus = 4
+    elif checkstatus == 4:
+        statuspic = None
+        fightOptions()
+        rw.bind('<Button-1>', passfunc)
+
+
+def passfunc(event):
+    pass
+
+
+
+
 rw = Tk()
 
-#rw.geometry("750x650")
 rw.resizable(False, False)
 # Tegin 2 suuremat frame, top ja bottom display ja alumise osa jaoks
 displayFrame = Frame(rw, width=750, height=500)
 displayFrame.pack(fill=BOTH, expand=YES, side=TOP)
 
 
-bottomFrame = Frame(rw)
-bottomFrame.pack(fill=BOTH)
+bottomFrame = Frame(rw, bg='gray')
+bottomFrame.pack(fill=BOTH, pady=10, padx=10)
 
 # 3 frame, mis paigutatud bottom frame sisse(NESW nupud, Buttonite area, Textboxi area)
-navigationFrame = Frame(bottomFrame)
+navigationFrame = Frame(bottomFrame, bg='gray')
 navigationFrame.grid(column=0, row=0, sticky=W)
 
-buttonFrame = Frame(bottomFrame)
+buttonFrame = Frame(bottomFrame, bg='gray')
 buttonFrame.grid(column=1, row=0)
 
-textFrame = Frame(bottomFrame)
+textFrame = Frame(bottomFrame, bg='gray')
 textFrame.grid(column=2, row=0, sticky=E)
 
-screen = Canvas(displayFrame, bg="lime", height=500, width=750)
+screen = Canvas(displayFrame, bg="darksalmon", height=500, width=750)
 screen.pack(fill=X, expand=YES, side=TOP)
 
 btn1Nav = Button(navigationFrame)
 btn2Nav = Button(navigationFrame)
 btn3Nav = Button(navigationFrame)
 
-btnN = Button(navigationFrame, text="N")
+btnN = Button(navigationFrame, text="N", borderwidth=2, relief='groove', width=2)
 btnN.grid(column=1, row=0)
 btnN.config(command=move_N)
 
-btnE = Button(navigationFrame, text="E")
+btnE = Button(navigationFrame, text="E", borderwidth=2, relief='groove', width=2)
 btnE.grid(column=2, row=1)
 btnE.config(command=move_E)
 
-btnS = Button(navigationFrame, text="S")
+btnS = Button(navigationFrame, text="S", borderwidth=2, relief='groove', width=2)
 btnS.grid(column=1, row=2)
 btnS.config(command=move_S)
 
-btnW = Button(navigationFrame, text="W")
+btnW = Button(navigationFrame, text="W", borderwidth=2, relief='groove', width=2)
 btnW.grid(column=0, row=1)
 btnW.config(command=move_W)
 
@@ -791,22 +935,26 @@ rw.bind("d", go_E)
 rw.bind("s", go_S)
 
 # Tegin ühe textboxi, mille teksti saab korduvalt muuta(Check weapons or movement restricions for example)
-textbox = Text(textFrame, height=4, width=30, wrap=WORD)
+textbox = Text(textFrame, height=4, width=60, wrap=WORD)
 textbox.insert(END, "This is a box of text")
 textbox.pack(side=RIGHT)
 
 # Tegin alguses valmis kolme nupu variabled, mida muuta (3 weaponi jaoks hetkel, aga saab kasutada muu jaoks veel)
-btnTop = Button(buttonFrame, text="First Button")
+btnTop = Button(buttonFrame, text="First Button", command=kill_buttons)
 btnTop.pack(fill=X, padx=10)
-btnTop.pack_forget()
 
-btnMiddle = Button(buttonFrame, text="Second Button")
+btnMiddle = Button(buttonFrame, text="Second Button", command=kill_buttons)
 btnMiddle.pack(fill=X, padx=10)
-btnMiddle.pack_forget()
 
-btnBottom = Button(buttonFrame, text="Third Button")
+btnBottom = Button(buttonFrame, text="Third Button", command=kill_buttons)
 btnBottom.pack(fill=X, padx=10)
-btnBottom.pack_forget()
+
+Backgroundpic = PhotoImage(file='pictures/BGStart.png')
+screen.create_image(377,252, image=Backgroundpic)
+
+
+enemypic = PhotoImage(file='Pictures/GoblinIdle.png')
+playerpic = PhotoImage(file='Pictures/PlayerIdle.png')
 
 # Impordin starting are image minimapi jaoks
 minimapBG = PhotoImage(file="pictures/Background.png")
@@ -815,5 +963,12 @@ locationImage = PhotoImage(file="pictures/LocatedRoomStart.png")
 screen.create_image(2, 2, anchor=NW, image=minimapBG)
 screen.create_image(2, 2, anchor=NW, image=minimapImage)
 screen.create_image(2, 2, anchor=NW, image=locationImage)
+
+goblindodge = PhotoImage(file='Pictures/GoblinDodge.png')
+goblinattack = PhotoImage(file='Pictures/GoblinAttack.png')
+goblinidle = PhotoImage(file='Pictures/GoblinIdle.png')
+playeridle = PhotoImage(file='Pictures/PlayerIdle.png')
+playerattack = PhotoImage(file='Pictures/PlayerAttack.png')
+playerdodge = PhotoImage(file='Pictures/PlayerDodge.png')
 
 rw.mainloop()
