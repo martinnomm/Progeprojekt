@@ -1,0 +1,1 @@
+Mängu launchimiseks käivita Characters.py. Disclaimer: Kõik pildid peale playeri ja enemy on ise joonistatud.

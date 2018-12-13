@@ -710,7 +710,7 @@ def go_E(event):
 def weapon_mace():
     player.chosen_weapon = Mace()
     textbox.delete(1.0, END)
-    textbox.insert(END, "You chose the mace, a weapon capable of stunning enmies.")
+    textbox.insert(END, "You chose the mace, a weapon capable of stunning enemies.")
 
 
 def weapon_stiletto():
