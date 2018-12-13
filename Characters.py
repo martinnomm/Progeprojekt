@@ -31,6 +31,9 @@ class Player(Character):
         self.chosen_spell = None
         self.spell_string = None
         self.status = []
+        self.picstatus = None
+        self.chosen_enemy = None
+        self.max_health = 12
     evasion = 12
     strength = D8()
 
@@ -78,6 +81,16 @@ class Player(Character):
             tegevus = textbox.insert(END, 'You miss your attack.')
             rw.after(200, tegevus)
 
+    def picSet(self, moment):
+        if moment == 'Idle':
+            self.picstatus = PhotoImage(file='Pictures/PlayerIdle.png')
+        if moment == 'Attack':
+            self.picstatus = PhotoImage(file='Pictures/PlayerAttack.png')
+        if moment == 'Dodge':
+            self.picstatus = PhotoImage(file='Pictures/PlayerDodge.png')
+        if moment == 'None':
+            self.picstatus = None
+
 
 class Weapon:
     def __init__(self, damage_roll, attributes):
@@ -119,23 +132,36 @@ class Goblin(Enemy):
     def __init__(self, name="goblin", strength=D6(), evasion=8, health=20, status_effects=[], weakness='fire'):
         super().__init__(name, strength, evasion, health, status_effects, weakness)
         self.max_health = 20
+        self.picstatus = None
 
     def attack(self, target):
         target.health -= D6()
 
+    def picSet(self, moment):
+        if moment == 'Idle':
+            self.picstatus = PhotoImage(file='Pictures/GoblinIdle.png')
+        if moment == 'Attack':
+            self.picstatus = PhotoImage(file='Pictures/GoblinAttack.png')
+        if moment == 'Dodge':
+            self.picstatus = PhotoImage(file='Pictures/GoblinDodge.png')
+        if moment == 'None':
+            self.picstatus = None
 
 
 def melee():
-    global playerpic, screen,enemypic
-    playerpic = playerattack
-    enemypic = goblinidle
+    global playerpic, screen, enemypic
+    player.picSet('Attack')
+
     player_hit_chance = D20()
-    player.attack(newenemy, player_hit_chance)
+    if player_hit_chance < player.chosen_enemy.evasion:
+        player.chosen_enemy.picSet('Dodge')
+        screen.create_image(500, 140, anchor=NW, image=player.chosen_enemy.picstatus)
+    screen.create_image(100, 200, anchor=NW, image=player.picstatus)
+    player.attack(player.chosen_enemy, player_hit_chance)
     btn1Nav.pack_forget()
     btn2Nav.pack_forget()
     btn3Nav.pack_forget()
-    rw.bind('<Button-1>',fightcheck)
-    #Game_END()
+    rw.bind('<Button-1>', fightcheck)
 
 
 
@@ -145,46 +171,21 @@ def unbinded(event):
 
 def statuscheck():
     textbox.delete(1.0, END)
-    if newenemy.max_health == newenemy.health:
-        enemystatus = 'The {} is at maximum glory.'.format(newenemy.name)
-    elif newenemy.health / newenemy.max_health >= 0.75 and newenemy.health / newenemy.max_health < 1:
-        enemystatus = 'The {} is slightly wounded.'.format(newenemy.name)
-    elif newenemy.health / newenemy.max_health >= 0.5 and  newenemy.health / newenemy.max_health < 0.75:
-        enemystatus = 'The {} is wounded'.format(newenemy.name)
-    elif newenemy.health / newenemy.max_health >= 0.25 and newenemy.health / newenemy.max_health < 0.5:
-        enemystatus = 'The {} is severely wounded'.format(newenemy.name)
-    elif newenemy.health / newenemy.max_health > 0 and newenemy.health / newenemy.max_health < 0.25:
-        enemystatus = 'The {} is grievously wounded'.format(newenemy.name)
+    if player.chosen_enemy.max_health == player.chosen_enemy.health:
+        enemystatus = 'The {} is at maximum glory.'.format(player.chosen_enemy.name)
+    elif player.chosen_enemy.health / player.chosen_enemy.max_health >= 0.75 and player.chosen_enemy.health / player.chosen_enemy.max_health < 1:
+        enemystatus = 'The {} is slightly wounded.'.format(player.chosen_enemy.name)
+    elif player.chosen_enemy.health / player.chosen_enemy.max_health >= 0.5 and  player.chosen_enemy.health / player.chosen_enemy.max_health < 0.75:
+        enemystatus = 'The {} is wounded'.format(player.chosen_enemy.name)
+    elif player.chosen_enemy.health / player.chosen_enemy.max_health >= 0.25 and player.chosen_enemy.health / player.chosen_enemy.max_health < 0.5:
+        enemystatus = 'The {} is severely wounded'.format(player.chosen_enemy.name)
+    elif player.chosen_enemy.health / player.chosen_enemy.max_health > 0 and player.chosen_enemy.health / player.chosen_enemy.max_health < 0.25:
+        enemystatus = 'The {} is grievously wounded'.format(player.chosen_enemy.name)
     else:
         print('wat')
-    textbox.insert(END, 'You are at {0.health} health. Your max is 12. \nThe {1.name} is weak to {1.weakness}. \n'.format(player, newenemy)+enemystatus)
+        enemystatus = 'Wat'
+    textbox.insert(END, 'You are at {0.health} health. Your max is 12. \nThe {1.name} is weak to {1.weakness}. \n'.format(player, player.chosen_enemy)+enemystatus)
 
-def enemycheck():
-    if newenemy.health <= 0:
-        textbox.delete(1.0, END)
-        textbox.insert(END, 'You have slain the {}. And thus are able to escape the Dungeon.'.format(newenemy.name))
-        return True
-    else:
-        return False
-
-def Game_END():
-    if enemycheck():
-        btn1Nav.pack_forget()
-        btn2Nav.pack_forget()
-        btn3Nav.pack_forget()
-    else:
-        newenemy.attack(player)
-    if player.health <= 0:
-        btn1Nav.pack_forget()
-        btn2Nav.pack_forget()
-        btn3Nav.pack_forget()
-        textbox.delete(1.0, END)
-        textbox.insert(END, 'The {} has slain you and your body will remain in the Dungeon forever.'.format(newenemy.name))
-
-    if enemycheck():
-        btn1Nav.pack_forget()
-        btn2Nav.pack_forget()
-        btn3Nav.pack_forget()
 
 def spell():
     textbox.delete(1.0, END)
@@ -199,58 +200,123 @@ def spell():
 
 
 def spell_use_fireball():
-    player_hit_chance = D20()
-    player.chosen_spell = Fireball()
-    player.spell_string = 'Fireball'
-    player.spell_attack(newenemy, player_hit_chance)
-    player.mana -= Fireball().mana_cost
-    spell_back()
-    btn1Nav.pack_forget()
-    btn2Nav.pack_forget()
-    btn3Nav.pack_forget()
-    rw.bind('<Button-1>', fightcheck)
+    global playerpic, enemypic, screen, fireballpic
+    if player.mana < 20:
+        textbox.delete(1.0, END)
+        textbox.insert(END, 'You do not have enough mana to cast Fireball.')
+    else:
+
+        player_hit_chance = D20()
+        player.chosen_spell = Fireball()
+        player.spell_string = 'Fireball'
+        if not(player_hit_chance >= player.chosen_enemy.evasion):
+            player.chosen_enemy.picSet('Dodge')
+            screen.create_image(500, 140, anchor=NW, image=player.chosen_enemy.picstatus)
+        else:
+            player.chosen_enemy.picSet('Idle')
+            screen.create_image(500, 140, anchor=NW, image=player.chosen_enemy.picstatus)
+        player.spell_attack(player.chosen_enemy, player_hit_chance)
+        player.mana -= Fireball().mana_cost
+        spell_back()
+        btn1Nav.pack_forget()
+        btn2Nav.pack_forget()
+        btn3Nav.pack_forget()
+        rw.bind('<Button-1>', fightcheck)
+        playerpic = player.picSet('Attack')
+        screen.create_image(100, 200, anchor=NW, image=player.picstatus)
+        fireballpic = PhotoImage(file='Pictures/SpellFireball.png')
+        screen.create_image(300, 230, anchor=NW, image=fireballpic)
 
 def spell_use_iceshard():
-    player_hit_chance = D20()
-    player.chosen_spell = Iceshard()
-    player.spell_string = 'Iceshard'
-    player.spell_attack(newenemy, player_hit_chance)
-    player.mana -= Iceshard().mana_cost
-    spell_back()
-    btn1Nav.pack_forget()
-    btn2Nav.pack_forget()
-    btn3Nav.pack_forget()
-    rw.bind('<Button-1>', fightcheck)
+    global playerpic, enemypic, screen, iceshardpic
+    if player.mana < 20:
+        textbox.delete(1.0,END)
+        textbox.insert(END, 'You do not have enough mana to cast Iceshard')
+    else:
+        player.picSet('Attack')
+        screen.create_image(100, 200, anchor=NW, image=player.picstatus)
+        player_hit_chance = D20()
+        player.chosen_spell = Iceshard()
+        player.spell_string = 'Iceshard'
+        if not(player_hit_chance >= player.chosen_enemy.evasion):
+            player.chosen_enemy.picSet('Dodge')
+            screen.create_image(500, 140, anchor=NW, image=player.chosen_enemy.picstatus)
+        else:
+            player.chosen_enemy.picSet('Idle')
+            screen.create_image(500, 140, anchor=NW, image=player.chosen_enemy.picstatus)
+        player.spell_attack(player.chosen_enemy, player_hit_chance)
+        player.mana -= Iceshard().mana_cost
+        spell_back()
+        btn1Nav.pack_forget()
+        btn2Nav.pack_forget()
+        btn3Nav.pack_forget()
+        rw.bind('<Button-1>', fightcheck)
+        playerpic = player.picSet('Attack')
+        screen.create_image(100, 200, anchor=NW, image=player.picstatus)
+        iceshardpic = PhotoImage(file='Pictures/SpellIceshard.png')
+        screen.create_image(300, 230, anchor=NW, image=iceshardpic)
 
 
 def spell_use_thunderbolt():
-    player_hit_chance = D20()
-    player.chosen_spell = Thunderbolt()
-    player.spell_string = 'Thunderbolt'
-    player.spell_attack(newenemy, player_hit_chance)
-    player.mana -= Thunderbolt().mana_cost
-    spell_back()
-    btn1Nav.pack_forget()
-    btn2Nav.pack_forget()
-    btn3Nav.pack_forget()
-    rw.bind('<Button-1>', fightcheck)
+    global playerpic, enemypic, screen, thunderboltpic
+    if player.mana < 20:
+        textbox.delete(1.0, END)
+        textbox.insert(END, 'You do not have enough mana to cast Thunderbolt.')
+    else:
+        player.picSet('Attack')
+        screen.create_image(100, 200, anchor=NW, image=player.picstatus)
+        player_hit_chance = D20()
+        player.chosen_spell = Thunderbolt()
+        player.spell_string = 'Thunderbolt'
+        if not(player_hit_chance >= player.chosen_enemy.evasion):
+            player.chosen_enemy.picSet('Dodge')
+            screen.create_image(500, 140, anchor=NW, image=player.chosen_enemy.picstatus)
+        else:
+            player.chosen_enemy.picSet('Idle')
+            screen.create_image(500, 140, anchor=NW, image=player.chosen_enemy.picstatus)
+        player.spell_attack(player.chosen_enemy, player_hit_chance)
+        player.mana -= Thunderbolt().mana_cost
+        spell_back()
+        btn1Nav.pack_forget()
+        btn2Nav.pack_forget()
+        btn3Nav.pack_forget()
+        rw.bind('<Button-1>', fightcheck)
+        playerpic = player.picSet('Attack')
+        screen.create_image(100, 200, anchor=NW, image=player.picstatus)
+        thunderboltpic = PhotoImage(file='Pictures/SpellThunderbolt.png')
+        screen.create_image(300, 230, anchor=NW, image=thunderboltpic)
 
 def spell_use_heal():
-    nowhealth = player.health
-    player.mana -= Heal().mana_cost
-    player.health += Heal().heal
-    newhealth = player.health
-    textbox.delete(1.0, END)
-    if nowhealth == newhealth:
-        textbox.insert(END, 'You were already at full health.')
-    elif newhealth > nowhealth:
-        healthchange = nowhealth - newhealth
-        textbox.insert(END, 'You healed yourself for {} health.'.format(healthchange))
-    spell_back()
-    btn1Nav.pack_forget()
-    btn2Nav.pack_forget()
-    btn3Nav.pack_forget()
-    rw.bind('<Button-1>', fightcheck)
+    global playerpic,enemypic,screen, healpic
+    if player.mana < 25:
+        textbox.delete(1.0, END)
+        textbox.insert(END, 'You do not have enough mana to cast Heal.')
+    else:
+        player.picSet('Idle')
+        player.chosen_enemy.picSet('Idle')
+        screen.create_image(500, 140, anchor=NW, image=player.chosen_enemy.picstatus)
+        screen.create_image(100, 200, anchor=NW, image=player.picstatus)
+        nowhealth = player.health
+        player.mana -= Heal().mana_cost
+        player.health += Heal().heal
+        if player.health > player.max_health:
+            player.health = player.max_health
+        newhealth = player.health
+        textbox.delete(1.0, END)
+        if nowhealth == newhealth:
+            textbox.insert(END, 'You were already at full health.')
+        elif newhealth > nowhealth:
+            healthchange = nowhealth - newhealth
+            textbox.insert(END, 'You healed yourself for {} health.'.format(healthchange))
+        spell_back()
+        btn1Nav.pack_forget()
+        btn2Nav.pack_forget()
+        btn3Nav.pack_forget()
+        rw.bind('<Button-1>', fightcheck)
+        playerpic = player.picSet('Attack')
+        screen.create_image(100, 200, anchor=NW, image=player.picstatus)
+        healpic = PhotoImage(file='Pictures/SpellHeal.png')
+        screen.create_image(300, 230, anchor=NW, image=healpic)
 
 
 
@@ -259,107 +325,6 @@ def spell_back():
     btnMiddle.pack_forget()
     fightOptions()
 
-def battle(player,enemy):
-    print("An enemy {0.name} appears with a defense of {0.evasion}".format(enemy))
-    # Combat loop
-    while player.health > 0 and enemy.health > 0:
-        player_hit_chance = D20()
-        textbox.delete(1.0, END)
-        textbox.insert(END, "Do you want to attack, use a spell or do nothing?")
-        if action.lower() == "attack":
-            action_2 = input("Do you want to use a spell or melee attack? (spell, melee)")
-            if action_2.lower() == 'melee':
-                player.attack(enemy, player_hit_chance)
-
-            if action_2.lower() == 'spell':
-                w_spell = input("Which spell would you like to use? (Fireball, Thunderbolt, Iceshard")
-
-                if player.mana >= 20:
-                    if w_spell == 'Fireball':
-                        player.chosen_spell = Fireball()
-                        player.spell_attack(enemy, player_hit_chance)
-                        player.mana -= Fireball().mana_cost
-                    elif w_spell == 'Thunderbolt':
-                        player.chosen_spell = Thunderbolt()
-                        player.spell_attack(enemy, player_hit_chance)
-                        player.mana -= Thunderbolt().mana_cost
-                    elif w_spell == 'Iceshard':
-                        player.chosen_spell = Iceshard()
-                        player.spell_attack(enemy, player_hit_chance)
-                        player.mana -= Iceshard().mana_cost
-
-                else:
-                    print("You do not have enough mana!")
-        elif action.lower() == 'heal':
-            action2 = input("Heal or heal status?")
-            if player.mana >= 25:
-                if action2.lower() == 'heal':
-                    player.mana -= Heal().mana_cost
-                    player.health += Heal().heal
-                    if player.health > 12:
-                        player.health = 12
-                elif action2.lower() == 'heal status':
-                    player.status.clear()
-                    print("All status effects have been removed.")
-            else:
-                print("You do not have enough mana")
-        elif action.lower() == "flee":
-            if D20() > 10:
-                print("You flee the fight")
-                break
-            else:
-                print("Failed to flee")
-        elif action == "":
-            print("You do nothing")
-        else:
-            print("Not understood, doing nothing")
-
-        print("The health of the {0.name} is now {0.health}.".format(enemy))
-        if enemy.health <= 0:
-            break
-        enemy_hit_chance = D20()
-        if "stunned" in enemy.status_effects:
-            print("The {0.name} is stunned.".format(enemy))
-            enemy.status_effects.remove("stunned")
-        elif 'frozen' in enemy.status_effects:
-            print("The {0.name} is frozen".format(enemy))
-        elif 'paralyzed' in enemy.status_effects:
-            print("The {0.name} is paralyzed".format(enemy))
-        else:
-            if enemy_hit_chance >= player.evasion:
-                print("The {0.name} attacks you".format(enemy))
-                enemy.attack(player)
-            else:
-                print("The {0.name} misses their attack.".format(enemy))
-        if "poisoned" in enemy.status_effects:
-            print("The {0.name} takes damage from poison".format(enemy))
-            enemy.health -= D4()
-            enemy.status_effects.remove("poisoned")
-        if "bleeding" in enemy.status_effects:
-            print("The {0.name} takes damage from bleeding".format(enemy))
-            enemy.health -= D4()
-            enemy.status_effects.remove("bleeding")
-            print(enemy.health)
-        if 'burned' in enemy.status_effects:
-            print("The {0.name} takes damage from burn".format(enemy))
-            enemy.health -= D4()
-            enemy.status_effects.remove('burned')
-        if player.health <= 0:
-            break
-        else:
-            print("Your health is now {0.health}.".format(player))
-        sleep(0.1)
-
-    # Display outcome
-    if enemy.health <= 0:
-        player.xp += 14
-        player.mana = 100
-        xp_needed = 100 - player.xp
-
-        print("You killed the {0.name}.".format(enemy))
-        print('You gained 14 xp,', xp_needed, 'xp needed to gain a level')
-    elif player.health <= 0:
-        print("The {0.name} killed you.".format(enemy))
 
 # ############# Dungeon Area ################## #
 
@@ -368,69 +333,6 @@ class Area:
     def __init__(self, Directions, Actions):
         self.Directions = Directions
         self.Actions = Actions
-
-    def show_actions(self):
-        mingid_suunad = []
-        for i in ["n", "e", "s", "w"]:
-            if self.Directions[i] is not None:
-                mingid_suunad.append(i)
-        for suund in mingid_suunad:
-            print("You can move to: " + suund)
-        if None not in player.current_area.Actions:
-            for action in player.current_area.Actions:
-                print("You can also: " + action)
-        print("Leave = 'x'")
-        vastus = input()
-        choices = mingid_suunad[:]
-        choices.extend("x")
-        choices.append("weapon")
-        choices.append("get_key")
-        if None not in player.current_area.Actions:
-            if "fight" in player.current_area.Actions:
-                fight()
-                if player.health > 0:
-                    player.current_area.Actions.remove("fight")
-        while vastus.lower() not in choices:
-            print("Not understood")
-            vastus = input()
-        if vastus.lower() == "n":
-            if player.current_area == not_visited_areas["Room1"]:
-                if player.chosen_weapon is None:
-                    print("This way seems dangerous. You need a weapon to be safe.")
-                else:
-                    player.current_area = not_visited_areas[player.current_area.Directions["n"]]
-            else:
-                player.current_area = not_visited_areas[player.current_area.Directions["n"]]
-        if vastus.lower() == "e":
-            if player.current_area == not_visited_areas["Room1"]:
-                if player.chosen_weapon is None:
-                    print("This way seems dangerous. You need a weapon to be safe.")
-                else:
-                    player.current_area = not_visited_areas[player.current_area.Directions["e"]]
-            else:
-                player.current_area = not_visited_areas[player.current_area.Directions["e"]]
-        if vastus.lower() == "s":
-            if player.current_area == not_visited_areas["Room1"]:
-                if "key" not in player.Inventory:
-                    print("The door seems to have locked behind you. The key might be further ahead.")
-
-                else:
-                    player.current_area = not_visited_areas[player.current_area.Directions["s"]]
-            else:
-                player.current_area = not_visited_areas[player.current_area.Directions["s"]]
-        if vastus.lower() == "w":
-            player.current_area = not_visited_areas[player.current_area.Directions["w"]]
-        if "Ayylmao" in player.current_area.Actions:
-            print("Ayylmao")
-        if "Game_Over_Leave" in player.current_area.Actions:
-            if vastus.lower() == "x":
-                player.Game_Over = "Leave"
-        if "weapon" in player.current_area.Actions:
-            if vastus.lower() == "weapon":
-                choose_weapon()
-        if "Get_Key" in player.current_area.Actions:
-            if "key" not in player.Inventory:
-                player.Inventory.append("key")
 
 
 class Start_Area(Area):
@@ -492,10 +394,13 @@ player = playerlist[0]
 enemylist = [Goblin()]
 newenemy = enemylist[0]
 
+# Neid pole vaja tähele panna, kood töötab täiuslikult ilma kõrvaliste parandusteta :)
 thisishereasbandaid = False
+thisishereasbandaid2 = False
+thisishereasbandaid3 = False
 
 def fight():
-    battle(player, newenemy)
+    battle(player, player.chosen_enemy)
 
 # enemies = [Enemy("Goblin", D4(), 8, 11)]
 
@@ -536,11 +441,14 @@ def hideWeapons():
 
 
 def fightOptions():
-    global btnN, btnW, btnS, btnE, enemypic, playerpic, checkstatus, screen
-    checkstatus = 1
-
+    global btnN, btnW, btnS, btnE, enemypic, playerpic, checkstatus, screen, thisishereasbandaid, thisishereasbandaid2
+    player.chosen_enemy.picSet('Idle')
+    player.picSet('Idle')
+    screen.create_image(500, 140, anchor=NW, image=player.chosen_enemy.picstatus)
+    screen.create_image(100, 200, anchor=NW, image=player.picstatus)
     screen.update_idletasks()
     screen.update()
+    checkstatus=1
     if 'fight' in player.current_area.Actions:
         textbox.delete(1.0, END)
         textbox.insert(END, "You challenge the goblin to a fight")
@@ -559,23 +467,24 @@ def fightOptions():
     btn2Nav.config(text="Spell", command=spell)
     btn3Nav.pack(fill=X, padx=10)
     btn3Nav.config(text="Status", command=statuscheck)
-    #screen.create_image(500, 140, anchor=NW, image=enemypic)
-    #screen.create_image(100, 200, anchor=NW, image=playerpic)
+
 
 def enemyattack():
     global playerpic, enemypic, screen
-    if 'stunned' not in newenemy.status_effects:
-        enemypic = goblinattack
-        #screen.create_image(500, 140, anchor=NW, image=enemypic)
+    if 'stunned' not in player.chosen_enemy.status_effects:
+        player.chosen_enemy.picSet('Attack')
+        screen.create_image(500, 140, anchor=NW, image=player.chosen_enemy.picstatus)
         enemy_hit_chance = D20()
         textbox.delete(1.0, END)
         if enemy_hit_chance >= player.evasion:
-            textbox.insert(END, "The {0.name} attacks you and hits".format(newenemy))
-            newenemy.attack(player)
+            player.picSet('Idle')
+            screen.create_image(100, 200, anchor=NW, image=player.picstatus)
+            textbox.insert(END, "The {0.name} attacks you and hits".format(player.chosen_enemy))
+            player.chosen_enemy.attack(player)
         else:
-            playerpic = playerdodge
-            #screen.create_image(100, 200, anchor=NW, image=playerpic)
-            textbox.insert(END, "The {0.name} tries to hit you but you dodge their attack.".format(newenemy))
+            player.picSet('Dodge')
+            screen.create_image(100, 200, anchor=NW, image=player.picstatus)
+            textbox.insert(END, "The {0.name} tries to hit you but you dodge their attack.".format(player.chosen_enemy))
 
 
 # Checkmap command, mis ala kohta paneb õige minimapi display
@@ -671,6 +580,7 @@ def checkMap():
 
 
 def move_N():
+    global thisishereasbandaid3, Backgroundpic, screen
     if player.current_area.Directions["n"] is None:
         textbox.delete(1.0, END)
         textbox.insert(END, "The Northern wall has no path")
@@ -693,13 +603,13 @@ def move_N():
                     textbox.delete(1.0, END)
                     textbox.insert(END, 'There seems to be an angry looking green midget up ahead.')
                 if "fight" in player.current_area.Actions:
-                    enemypic = PhotoImage(file='Pictures/GoblinIdle.png')
-                    playerpic = PhotoImage(file='Pictures/PlayerIdle.png')
-                    screen.create_image(500, 140, anchor=NW, image=enemypic)
-                    screen.create_image(100, 200, anchor=NW, image=playerpic)
+                    Backgroundpic = PhotoImage(file='pictures/BGRoomBoss.png')
+                    screen.create_image(377, 252, image=Backgroundpic)
+                    if player.current_area == not_visited_areas["RoomBoss"]:
+                        player.chosen_enemy = newenemy
                     fightOptions()
 
-                    #fight()
+                    thisishereasbandaid3 = True
                     if player.health > 0:
                         player.current_area.Actions.remove("fight")
         else:
@@ -713,16 +623,15 @@ def move_N():
                 textbox.delete(1.0, END)
                 textbox.insert(END, 'There seems to be an angry looking green midget up ahead.')
             if "fight" in player.current_area.Actions:
-                enemypic = PhotoImage(file='Pictures/GoblinIdle.png')
-                playerpic = PhotoImage(file='Pictures/PlayerIdle.png')
-                screen.create_image(500, 140, anchor=NW, image=enemypic)
-                screen.create_image(100, 200, anchor=NW, image=playerpic)
+                Backgroundpic = PhotoImage(file='pictures/BGRoomBoss.png')
+                screen.create_image(377, 252, image=Backgroundpic)
+                if player.current_area == not_visited_areas["RoomBoss"]:
+                    player.chosen_enemy = newenemy
                 fightOptions()
+                thisishereasbandaid3 = True
 
-                if player.health >= 0:
-                    #Game_End()
-                    pass
-        checkMap()
+        if not thisishereasbandaid3:
+            checkMap()
 
 
 
@@ -827,19 +736,28 @@ def kill_buttons():
 
 
 def fightcheck(event):
-    global checkstatus, statuspic, screen,enemypic,playerpic,thisishereasbandaid
+    global checkstatus, statuspic, screen, enemypic, playerpic, thisishereasbandaid, fireballpic, iceshardpic, thunderboltpic, healpic, Backgroundpic
     btn1Nav.pack()
-    btn1Nav.config(text='Press left mouse button to cont.', command= passfunc)
+    btn1Nav.config(text='Press left mouse button to cont.', command= passfuncnoevent)
     if not thisishereasbandaid:
-        screen.create_image(500, 140, anchor=NW, image=enemypic)
-        screen.create_image(100, 200, anchor=NW, image=playerpic)
         thisishereasbandaid = True
-    enemypic = goblinidle
-    playerpic=playeridle
     if checkstatus == 1:
-        playerpic= playeridle
-        enemypic=goblinidle
-        if 'stunned' in newenemy.status_effects:
+        if player.health <= 0 or player.chosen_enemy.health <= 0:
+            rw.bind('<Button-1>', passfunc)
+            rw.bind('w', passfunc)
+            textbox.pack_forget()
+            checkstatus = 1
+            btn1Nav.pack_forget()
+            if player.health <= 0:
+                player.picSet('None')
+                Backgroundpic = PhotoImage(file='Pictures/GameLose.png')
+                screen.create_image(377, 252, image=Backgroundpic)
+            if player.chosen_enemy.health <= 0:
+                player.chosen_enemy.picSet('None')
+                Backgroundpic = PhotoImage(file='pictures/GameWin.png')
+                screen.create_image(377, 252, image=Backgroundpic)
+
+        if 'stunned' in player.chosen_enemy.status_effects:
             textbox.delete(1.0, END)
             textbox.insert(END, 'The goblin is stunned.')
             statuspic = PhotoImage(file='Pictures/StatusStunned.png')
@@ -848,27 +766,33 @@ def fightcheck(event):
         else:
             checkstatus = 2
     elif checkstatus == 2:
-        enemypic=goblinattack
+        fireballpic = None
+        iceshardpic = None
+        thunderboltpic = None
+        healpic = None
+
         enemyattack()
 
         checkstatus = 3
     elif checkstatus == 3:
-        playerpic = playeridle
-        enemypic = goblinidle
-        if 'poisoned' in newenemy.status_effects:
+        player.picSet('Idle')
+        player.chosen_enemy.picSet('Idle')
+        screen.create_image(500, 140, anchor=NW, image=player.chosen_enemy.picstatus)
+        screen.create_image(100, 200, anchor=NW, image=player.picstatus)
+        if 'poisoned' in player.chosen_enemy.status_effects:
             dam = randint(1, 4)
-            newenemy.health -= dam
-            newenemy.status_effects.remove('poisoned')
+            player.chosen_enemy.health -= dam
+            player.chosen_enemy.status_effects.remove('poisoned')
             textbox.delete(1.0, END)
-            textbox.insert(END, 'The {0.name} takes damage from poison.'.format(newenemy))
+            textbox.insert(END, 'The {0.name} takes damage from poison.'.format(player.chosen_enemy))
             statuspic = PhotoImage(file='Pictures/StatusPoisoned.png')
             screen.create_image(500, 100, image=statuspic)
-        if 'bleeding' in newenemy.status_effects:
+        if 'bleeding' in player.chosen_enemy.status_effects:
             dam = randint(1, 6)
-            newenemy.health -= dam
-            newenemy.status_effects.remove('bleeding')
+            player.chosen_enemy.health -= dam
+            player.chosen_enemy.status_effects.remove('bleeding')
             textbox.delete(1.0, END)
-            textbox.insert(END, 'The {0.name} takes damage from bleeding.'.format(newenemy))
+            textbox.insert(END, 'The {0.name} takes damage from bleeding.'.format(player.chosen_enemy))
             statuspic = PhotoImage(file='Pictures/StatusBleeding.png')
             screen.create_image(500, 100, image=statuspic)
         checkstatus = 4
@@ -877,7 +801,8 @@ def fightcheck(event):
         fightOptions()
         rw.bind('<Button-1>', passfunc)
 
-
+def passfuncnoevent():
+    pass
 def passfunc(event):
     pass
 
@@ -935,26 +860,22 @@ rw.bind("d", go_E)
 rw.bind("s", go_S)
 
 # Tegin ühe textboxi, mille teksti saab korduvalt muuta(Check weapons or movement restricions for example)
-textbox = Text(textFrame, height=4, width=60, wrap=WORD)
+textbox = Text(textFrame, height=4, width=60, wrap=WORD, borderwidth=2, relief='groove')
 textbox.insert(END, "You are a young adventurer with a curious mind. It just so happens that you found a mysterious door and are itching to see what lies beyond.")
 textbox.pack(side=RIGHT)
 
 # Tegin alguses valmis kolme nupu variabled, mida muuta (3 weaponi jaoks hetkel, aga saab kasutada muu jaoks veel)
-btnTop = Button(buttonFrame, text="First Button", command=kill_buttons)
+btnTop = Button(buttonFrame, text="First Button", command=kill_buttons, borderwidth=2, relief='groove')
 btnTop.pack(fill=X, padx=10)
 
-btnMiddle = Button(buttonFrame, text="Second Button", command=kill_buttons)
+btnMiddle = Button(buttonFrame, text="Second Button", command=kill_buttons, borderwidth=2, relief='groove')
 btnMiddle.pack(fill=X, padx=10)
 
-btnBottom = Button(buttonFrame, text="Third Button", command=kill_buttons)
+btnBottom = Button(buttonFrame, text="Third Button", command=kill_buttons, borderwidth=2, relief='groove')
 btnBottom.pack(fill=X, padx=10)
 
 Backgroundpic = PhotoImage(file='pictures/BGStart.png')
 screen.create_image(377,252, image=Backgroundpic)
-
-
-enemypic = PhotoImage(file='Pictures/GoblinIdle.png')
-playerpic = PhotoImage(file='Pictures/PlayerIdle.png')
 
 # Impordin starting are image minimapi jaoks
 minimapBG = PhotoImage(file="pictures/Background.png")
@@ -963,12 +884,5 @@ locationImage = PhotoImage(file="pictures/LocatedRoomStart.png")
 screen.create_image(2, 2, anchor=NW, image=minimapBG)
 screen.create_image(2, 2, anchor=NW, image=minimapImage)
 screen.create_image(2, 2, anchor=NW, image=locationImage)
-
-goblindodge = PhotoImage(file='Pictures/GoblinDodge.png')
-goblinattack = PhotoImage(file='Pictures/GoblinAttack.png')
-goblinidle = PhotoImage(file='Pictures/GoblinIdle.png')
-playeridle = PhotoImage(file='Pictures/PlayerIdle.png')
-playerattack = PhotoImage(file='Pictures/PlayerAttack.png')
-playerdodge = PhotoImage(file='Pictures/PlayerDodge.png')
 
 rw.mainloop()
