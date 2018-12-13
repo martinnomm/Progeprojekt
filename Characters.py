@@ -936,7 +936,7 @@ rw.bind("s", go_S)
 
 # Tegin ühe textboxi, mille teksti saab korduvalt muuta(Check weapons or movement restricions for example)
 textbox = Text(textFrame, height=4, width=60, wrap=WORD)
-textbox.insert(END, "This is a box of text")
+textbox.insert(END, "You are a young adventurer with a curious mind. It just so happens that you found a mysterious door and are itching to see what lies beyond.")
 textbox.pack(side=RIGHT)
 
 # Tegin alguses valmis kolme nupu variabled, mida muuta (3 weaponi jaoks hetkel, aga saab kasutada muu jaoks veel)
