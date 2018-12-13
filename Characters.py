@@ -307,7 +307,7 @@ def spell_use_heal():
         if nowhealth == newhealth:
             textbox.insert(END, 'You were already at full health.')
         elif newhealth > nowhealth:
-            healthchange = nowhealth - newhealth
+            healthchange = newhealth - nowhealth
             textbox.insert(END, 'You healed yourself for {} health.'.format(healthchange))
         spell_back()
         btn1Nav.pack_forget()
@@ -868,13 +868,10 @@ textbox.pack(side=RIGHT)
 
 # Tegin alguses valmis kolme nupu variabled, mida muuta (3 weaponi jaoks hetkel, aga saab kasutada muu jaoks veel)
 btnTop = Button(buttonFrame, text="First Button", command=kill_buttons, borderwidth=2, relief='groove')
-btnTop.pack(fill=X, padx=10)
 
 btnMiddle = Button(buttonFrame, text="Second Button", command=kill_buttons, borderwidth=2, relief='groove')
-btnMiddle.pack(fill=X, padx=10)
 
 btnBottom = Button(buttonFrame, text="Third Button", command=kill_buttons, borderwidth=2, relief='groove')
-btnBottom.pack(fill=X, padx=10)
 
 Backgroundpic = PhotoImage(file='pictures/BGStart.png')
 screen.create_image(377,252, image=Backgroundpic)
