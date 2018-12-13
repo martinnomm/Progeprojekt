@@ -46,7 +46,7 @@ class Player(Character):
                 if D20() > 8:
                     target.status_effects.append("bleeding")
             if "stun" in self.chosen_weapon.attributes:
-                if D20() > 8:
+                if D20() > 12:
                     target.status_effects.append("stunned")
             if "poison" in self.chosen_weapon.attributes:
                 if D20() > 9:
@@ -148,20 +148,7 @@ class Goblin(Enemy):
             self.picstatus = None
 
 
-def melee():
-    global playerpic, screen, enemypic
-    player.picSet('Attack')
 
-    player_hit_chance = D20()
-    if player_hit_chance < player.chosen_enemy.evasion:
-        player.chosen_enemy.picSet('Dodge')
-        screen.create_image(500, 140, anchor=NW, image=player.chosen_enemy.picstatus)
-    screen.create_image(100, 200, anchor=NW, image=player.picstatus)
-    player.attack(player.chosen_enemy, player_hit_chance)
-    btn1Nav.pack_forget()
-    btn2Nav.pack_forget()
-    btn3Nav.pack_forget()
-    rw.bind('<Button-1>', fightcheck)
 
 
 
@@ -186,6 +173,20 @@ def statuscheck():
         enemystatus = 'Wat'
     textbox.insert(END, 'You are at {0.health} health. Your max is 12. \nThe {1.name} is weak to {1.weakness}. \n'.format(player, player.chosen_enemy)+enemystatus)
 
+def melee():
+    global playerpic, screen, enemypic
+    player.picSet('Attack')
+
+    player_hit_chance = D20()
+    if player_hit_chance < player.chosen_enemy.evasion:
+        player.chosen_enemy.picSet('Dodge')
+        screen.create_image(500, 140, anchor=NW, image=player.chosen_enemy.picstatus)
+    screen.create_image(100, 200, anchor=NW, image=player.picstatus)
+    player.attack(player.chosen_enemy, player_hit_chance)
+    btn1Nav.pack_forget()
+    btn2Nav.pack_forget()
+    btn3Nav.pack_forget()
+    rw.bind('<Button-1>', fightcheck)
 
 def spell():
     textbox.delete(1.0, END)
@@ -399,12 +400,6 @@ thisishereasbandaid = False
 thisishereasbandaid2 = False
 thisishereasbandaid3 = False
 
-def fight():
-    battle(player, player.chosen_enemy)
-
-# enemies = [Enemy("Goblin", D4(), 8, 11)]
-
-
 def choose_weapon():
     print("Choose weapon: stiletto or mace or scythe")
     answer = input()
@@ -485,7 +480,8 @@ def enemyattack():
             player.picSet('Dodge')
             screen.create_image(100, 200, anchor=NW, image=player.picstatus)
             textbox.insert(END, "The {0.name} tries to hit you but you dodge their attack.".format(player.chosen_enemy))
-
+    else:
+        player.chosen_enemy.status_effects.remove('stunned')
 
 # Checkmap command, mis ala kohta paneb õige minimapi display
 
@@ -745,24 +741,30 @@ def fightcheck(event):
         if player.health <= 0 or player.chosen_enemy.health <= 0:
             rw.bind('<Button-1>', passfunc)
             rw.bind('w', passfunc)
-            textbox.pack_forget()
             checkstatus = 1
             btn1Nav.pack_forget()
             if player.health <= 0:
                 player.picSet('None')
-                Backgroundpic = PhotoImage(file='Pictures/GameLose.png')
-                screen.create_image(377, 252, image=Backgroundpic)
+                textbox.delete(1.0,END)
+                textbox.insert(END,
+                               "You have been defeated by the Goblin and your soul will remain in the dungeon forever.")
             if player.chosen_enemy.health <= 0:
                 player.chosen_enemy.picSet('None')
-                Backgroundpic = PhotoImage(file='pictures/GameWin.png')
-                screen.create_image(377, 252, image=Backgroundpic)
+                textbox.delete(1.0,END)
+                textbox.insert(END,
+                               "You have defeated the evil Goblin and you can finally escape the dreaded dungeon.")
 
-        if 'stunned' in player.chosen_enemy.status_effects:
+
+            Backgroundpic = PhotoImage(file='pictures/GameOver.png')
+            screen.create_image(377, 252, image=Backgroundpic)
+
+        elif 'stunned' in player.chosen_enemy.status_effects:
             textbox.delete(1.0, END)
             textbox.insert(END, 'The goblin is stunned.')
             statuspic = PhotoImage(file='Pictures/StatusStunned.png')
             screen.create_image(500, 100, image=statuspic)
             checkstatus = 3
+            player.chosen_enemy.status_effects.remove('stunned')
         else:
             checkstatus = 2
     elif checkstatus == 2:
